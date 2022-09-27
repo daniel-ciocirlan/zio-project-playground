@@ -1,5 +1,5 @@
-object Main {
-  def main(args: Array[String]): Unit = {
-    println("Hello world!")
-  }
+import zio._
+
+object Main extends ZIOAppDefault {
+  override def run = Console.printLine("ZIO Project baby!")
 }
