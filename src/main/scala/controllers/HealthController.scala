@@ -12,8 +12,12 @@ object HealthController {
 
 }
 
+/** A Controller collecting health related endpoints.
+  */
 case class HealthController() extends BaseController {
 
+  /** 200 "ok" at /health
+    */
   val healthRoute: Full[Unit, Unit, Unit, Throwable, String, Any, Task] =
     baseEndpoint
       .tag("health")
