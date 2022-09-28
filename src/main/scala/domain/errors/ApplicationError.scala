@@ -27,3 +27,6 @@ abstract class ApplicationServerException(message: String, cause: Throwable)
   */
 final case class UnknownException(message: String, cause: Throwable)
     extends ApplicationError(message, cause)
+
+final case class ConfigurationException(message: String, cause: Throwable)
+    extends ApplicationError(message, cause)

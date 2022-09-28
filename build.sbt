@@ -15,9 +15,12 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 ThisBuild / fork := true
 
+ThisBuild / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
+
 val zioVersion        = "2.0.2"
 val tapirVersion      = "1.1.0"
 val zioLoggingVersion = "2.1.1"
+val zioConfigVersion  = "3.0.2"
 
 lazy val libraries = Seq(
 //  "dev.zio"                     %% "zio"                     % "2.0.0",
@@ -35,7 +38,10 @@ lazy val libraries = Seq(
   "dev.zio"                     %% "zio-test"                % zioVersion,
   "dev.zio"                     %% "zio-test-sbt"            % zioVersion % "it, test",
   "dev.zio"                     %% "zio-test-magnolia"       % zioVersion % "it, test",
-  "dev.zio"                     %% "zio-mock"                % "1.0.0-RC8" % "it, test"
+  "dev.zio"                     %% "zio-mock"                % "1.0.0-RC8" % "it, test",
+  "dev.zio"                     %% "zio-config"              % zioConfigVersion,
+  "dev.zio"                     %% "zio-config-magnolia"     % zioConfigVersion,
+  "dev.zio"                     %% "zio-config-typesafe"     % zioConfigVersion
 )
 
 lazy val root = (project in file("."))
