@@ -7,6 +7,9 @@ import zio._
 
 object HealthController {
 
+  /** A ZIO constructor for our implementation (NOT a ZLayer!). See
+    * [[_root_.Main.makeControllers]]
+    */
   val makeZIO: UIO[HealthController] =
     ZIO.succeed(HealthController())
 
@@ -20,9 +23,9 @@ case class HealthController() extends BaseController {
     */
   val healthRoute: Full[Unit, Unit, Unit, Throwable, String, Any, Task] =
     baseEndpoint
-      .tag("health")
-      .name("Health")
-      .description("Health-check endpoint")
+      .tag("health")                        // swagger tag
+      .name("Health")                       // swagger name
+      .description("Health-check endpoint") // swagger description
       .get
       .in("health")
       .out(plainBody[String])

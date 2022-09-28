@@ -13,7 +13,11 @@ object Main extends ZIOAppDefault {
   val port = 9000
 
   /** A method to build our BaseController implementations, and return them as a
-    * Seq. All Controllers should be injected here.
+    * Seq. All Controllers should be injected here. Since we should be building
+    * our Controller implementations with the service module pattern, we don't
+    * have to worry about our routes needing any dependencies, and they will
+    * instead be surfaced here, and can be provided to the [[program]].
+    *
     * @return
     */
   def makeControllers: ZIO[Any, Nothing, Seq[BaseController]] = for {
