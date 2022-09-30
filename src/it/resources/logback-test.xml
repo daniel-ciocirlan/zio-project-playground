@@ -10,8 +10,11 @@
     </root>
 
     <logger name="io.netty" level="ERROR"/>
-    <logger name="org.flywaydb" level="ERROR"/>
+    <logger name="org.flywaydb" level="WARN"/>
     <logger name="com.zaxxer" level="ERROR"/>
     <logger name="io.getquill.context.jdbc" level="ERROR"/>
+    <logger name="org.testcontainers" level="WARN" />
+    <logger name="com.github.dockerjava" level="WARN" />
+    <logger name="ch.qos.logback" level="WARN" />
 
 </configuration>

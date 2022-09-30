@@ -95,7 +95,7 @@ case class FlywayServiceLive(flyway: Flyway) extends FlywayService {
 
 object FlywayServiceLive {
 
-  private val _layer = ZLayer {
+  val layer: ZLayer[Config, Throwable, FlywayService] = ZLayer {
     for {
       config <- ZIO.service[Config]
       flyway <- ZIO.attempt(
@@ -107,10 +107,10 @@ object FlywayServiceLive {
     } yield FlywayServiceLive(flyway)
   }
 
-  val layer: ZLayer[Scope, Throwable, FlywayService] = {
+  val configuredLayer: ZLayer[Scope, Throwable, FlywayService] = {
     ConfigService.makeConfig[Config](
       "rock.the.jvm.db.hikari-postgres.dataSource"
-    ) >>> _layer
+    ) >>> layer
 
   }
 
