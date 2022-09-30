@@ -13,7 +13,9 @@ ThisBuild / scalacOptions ++= Seq(
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
-ThisBuild / fork := true
+ThisBuild / fork       := true
+Test / fork            := true
+IntegrationTest / fork := true
 
 ThisBuild / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 
@@ -27,24 +29,25 @@ lazy val libraries = Seq(
 //  "dev.zio"                     %% "zio-streams"             % "2.0.0",
 //  "dev.zio"                     %% "zio-json"                % "0.3.0-RC8",
 //  "io.d11"                      %% "zhttp"                   % "2.0.0-RC11",
-  "com.softwaremill.sttp.tapir" %% "tapir-zio"               % tapirVersion, // Brings in zio, zio-streams
-  "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"   % tapirVersion, // Brings in zhttp
-  "com.softwaremill.sttp.tapir" %% "tapir-sttp-client"       % tapirVersion,
-  "com.softwaremill.sttp.tapir" %% "tapir-json-zio"          % tapirVersion, // brings in zio-json
-  "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle" % tapirVersion,
-  "dev.zio"                     %% "zio-logging"             % zioLoggingVersion,
-  "dev.zio"                     %% "zio-logging-slf4j"       % zioLoggingVersion,
-  "ch.qos.logback"               % "logback-classic"         % "1.4.1",
-  "dev.zio"                     %% "zio-test"                % zioVersion,
-  "dev.zio"                     %% "zio-test-sbt"            % zioVersion % "it, test",
-  "dev.zio"                     %% "zio-test-magnolia"       % zioVersion % "it, test",
-  "dev.zio"                     %% "zio-mock"                % "1.0.0-RC8" % "it, test",
-  "dev.zio"                     %% "zio-config"              % zioConfigVersion,
-  "dev.zio"                     %% "zio-config-magnolia"     % zioConfigVersion,
-  "dev.zio"                     %% "zio-config-typesafe"     % zioConfigVersion,
-  "io.getquill"                 %% "quill-jdbc-zio"          % "4.4.1",
-  "org.postgresql"               % "postgresql"              % "42.5.0",
-  "org.flywaydb"                 % "flyway-core"             % "9.3.1"
+  "com.softwaremill.sttp.tapir" %% "tapir-zio"                         % tapirVersion, // Brings in zio, zio-streams
+  "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"             % tapirVersion, // Brings in zhttp
+  "com.softwaremill.sttp.tapir" %% "tapir-sttp-client"                 % tapirVersion,
+  "com.softwaremill.sttp.tapir" %% "tapir-json-zio"                    % tapirVersion, // brings in zio-json
+  "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle"           % tapirVersion,
+  "dev.zio"                     %% "zio-logging"                       % zioLoggingVersion,
+  "dev.zio"                     %% "zio-logging-slf4j"                 % zioLoggingVersion,
+  "ch.qos.logback"               % "logback-classic"                   % "1.4.1",
+  "dev.zio"                     %% "zio-test"                          % zioVersion,
+  "dev.zio"                     %% "zio-test-sbt"                      % zioVersion % "it, test",
+  "dev.zio"                     %% "zio-test-magnolia"                 % zioVersion % "it, test",
+  "dev.zio"                     %% "zio-mock"                          % "1.0.0-RC8" % "it, test",
+  "dev.zio"                     %% "zio-config"                        % zioConfigVersion,
+  "dev.zio"                     %% "zio-config-magnolia"               % zioConfigVersion,
+  "dev.zio"                     %% "zio-config-typesafe"               % zioConfigVersion,
+  "io.getquill"                 %% "quill-jdbc-zio"                    % "4.4.1",
+  "org.postgresql"               % "postgresql"                        % "42.5.0",
+  "org.flywaydb"                 % "flyway-core"                       % "9.3.1",
+  "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.8.0"
 )
 
 lazy val root = (project in file("."))
