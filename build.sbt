@@ -41,13 +41,18 @@ lazy val libraries = Seq(
   "dev.zio"                     %% "zio-mock"                % "1.0.0-RC8" % "it, test",
   "dev.zio"                     %% "zio-config"              % zioConfigVersion,
   "dev.zio"                     %% "zio-config-magnolia"     % zioConfigVersion,
-  "dev.zio"                     %% "zio-config-typesafe"     % zioConfigVersion
+  "dev.zio"                     %% "zio-config-typesafe"     % zioConfigVersion,
+  "io.getquill"                 %% "quill-jdbc-zio"          % "4.4.1",
+  "org.postgresql"               % "postgresql"              % "42.5.0",
+  "org.flywaydb"                 % "flyway-core"             % "9.3.1"
 )
 
 lazy val root = (project in file("."))
+  .configs(IntegrationTest)
   .settings(
     name := "zio-project-playground",
-    libraryDependencies ++= libraries
+    libraryDependencies ++= libraries,
+    Defaults.itSettings
   )
 
 addCommandAlias("fmt", "all root/scalafmtSbt root/scalafmtAll")
