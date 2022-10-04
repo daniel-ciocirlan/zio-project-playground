@@ -1,6 +1,6 @@
 package domain.records
 
-import domain.api.User
+import domain.api.response.User
 
 case class UserRecord(
     id: Int,

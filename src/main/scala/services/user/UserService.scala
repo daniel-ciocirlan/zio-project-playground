@@ -1,6 +1,6 @@
 package services.user
 
-import domain.api.User
+import domain.api.response.User
 import domain.errors.DatabaseError
 import domain.records.UserRecord
 import extensions.Conversions.ConversionExtension

@@ -1,4 +1,9 @@
-import controllers.{BaseController, HealthController}
+import controllers.{BaseController, HealthController, UserController}
+import org.flywaydb.core.api.FlywayException
+import repositories.Repository
+import repositories.users.UserRepositoryLive
+import services.flyway.{FlywayService, FlywayServiceLive}
+import services.user.{UserService, UserServiceLive}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ziohttp.ZioHttpInterpreter
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
@@ -20,9 +25,10 @@ object Main extends ZIOAppDefault {
     *
     * @return
     */
-  def makeControllers: ZIO[Any, Nothing, Seq[BaseController]] = for {
+  def makeControllers: ZIO[UserService, Nothing, Seq[BaseController]] = for {
     health <- HealthController.makeZIO
-  } yield Seq(health)
+    users  <- UserController.makeZIO
+  } yield Seq(health, users)
 
   /** A method to aggregate the routes of our Controllers, and add swagger
     * documentation
@@ -41,9 +47,18 @@ object Main extends ZIOAppDefault {
     combined ++ doc
   }
 
+  private def initMigrations: ZIO[FlywayService, Throwable, Unit] =
+    for {
+      flyway <- ZIO.service[FlywayService]
+      _      <- flyway.runMigrations.catchSome { case _: FlywayException =>
+                  flyway.repairMigrations *> flyway.runMigrations
+                }
+    } yield ()
+
   /** Our main server application
     */
-  val program: ZIO[Any, Throwable, ExitCode] = for {
+  val program: ZIO[UserService with FlywayService, Throwable, ExitCode] = for {
+    _           <- initMigrations
     controllers <- makeControllers
     routes      <- gatherRoutes(controllers)
     _           <- ZIO.log(s"ZIO Project running at http://localhost:$port baby!")
@@ -58,6 +73,12 @@ object Main extends ZIOAppDefault {
   override def run: ZIO[Any, Throwable, ExitCode] =
     program
       .provide(
+        Scope.default,
+        Repository.dataSourceLayer,
+        Repository.quillPostgresLayer,
+        FlywayServiceLive.configuredLayer,
+        UserRepositoryLive.layer,
+        UserServiceLive.layer,
         Runtime.removeDefaultLoggers >>> SLF4J.slf4j // Make sure our ZIO.log's use slf4j
       )
 }
