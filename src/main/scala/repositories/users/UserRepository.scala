@@ -9,6 +9,7 @@ trait UserRepository {
   def create(record: UserRecord): Task[UserRecord]
   def update(id: Int, op: UserRecord => UserRecord): Task[UserRecord]
   def getById(id: Int): Task[Option[UserRecord]]
+  def getByUserName(userName: String): Task[Option[UserRecord]]
   def delete(id: Int): Task[UserRecord]
 }
 
@@ -52,6 +53,9 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
 
   override def delete(id: Int): Task[UserRecord] =
     run(query[UserRecord].filter(_.id == lift(id)).delete.returning(r => r))
+
+  override def getByUserName(username: String): Task[Option[UserRecord]] =
+    run(query[UserRecord].filter(_.userName == lift(username))).map(_.headOption)
 }
 
 object UserRepositoryLive {
