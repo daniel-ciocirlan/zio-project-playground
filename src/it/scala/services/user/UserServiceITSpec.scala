@@ -5,7 +5,6 @@ import domain.errors.DatabaseError
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import repositories.Repository
 import repositories.users.UserRepositoryLive
-import services.flyway
 import services.flyway.{FlywayService, FlywayServiceLive}
 import zio._
 import zio.test.{assertTrue, Spec, TestAspect, TestEnvironment, ZIOSpecDefault}
@@ -89,26 +88,15 @@ object UserServiceITSpec extends ZIOSpecDefault {
         .serviceWithZIO[FlywayService](_.runMigrations)
     )
 
-  val flywayConfigLayer: ZLayer[PostgreSQLContainer, Nothing, flyway.Config] =
-    ZLayer {
-      for {
-        container <- ZIO.service[PostgreSQLContainer]
-      } yield services.flyway.Config(
-        url = container.jdbcUrl,
-        user = container.username,
-        password = container.password
-      )
-    }
-  override def spec: Spec[TestEnvironment with Scope, Any]                   =
+  override def spec: Spec[TestEnvironment & Scope, Any] =
     suite("UserServiceITSpec")(
       tests
-    ).provideSome[DataSource & PostgreSQLContainer](
+    ).provideSome[DataSource & PostgreSQLContainer & Scope](
       Repository.quillPostgresLayer,
       UserRepositoryLive.layer,
       UserServiceLive.layer,
-      flywayConfigLayer,
-      FlywayServiceLive.layer
-    ).provideLayerShared(
+      FlywayServiceLive.testContainerLayer
+    ).provideSomeLayerShared[Scope](
       ZPostgreSQLContainer.Settings.default >>> ZPostgreSQLContainer.live
     )
 }

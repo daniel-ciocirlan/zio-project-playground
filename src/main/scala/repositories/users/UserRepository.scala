@@ -21,10 +21,10 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
   implicit val schema =
     schemaMeta[UserRecord]("users")
 
-  implicit val userInsertMeta =
+  implicit val insMeta =
     insertMeta[UserRecord](_.id)
 
-  implicit val userUpdateMeta =
+  implicit val upMeta =
     updateMeta[UserRecord](_.id)
 
   override def create(record: UserRecord): Task[UserRecord] =
@@ -55,7 +55,8 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
     run(query[UserRecord].filter(_.id == lift(id)).delete.returning(r => r))
 
   override def getByUserName(username: String): Task[Option[UserRecord]] =
-    run(query[UserRecord].filter(_.userName == lift(username))).map(_.headOption)
+    run(query[UserRecord].filter(_.userName == lift(username)))
+      .map(_.headOption)
 }
 
 object UserRepositoryLive {

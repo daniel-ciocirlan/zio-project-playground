@@ -1,6 +1,6 @@
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
-ThisBuild / scalaVersion := "2.13.9"
+ThisBuild / scalaVersion := "2.13.10"
 
 ThisBuild / scalacOptions ++= Seq(
   "-unchecked",
@@ -20,8 +20,8 @@ IntegrationTest / fork := true
 ThisBuild / testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
 
 val zioVersion        = "2.0.2"
-val tapirVersion      = "1.1.0"
-val zioLoggingVersion = "2.1.1"
+val tapirVersion      = "1.1.3"
+val zioLoggingVersion = "2.1.2"
 val zioConfigVersion  = "3.0.2"
 
 lazy val libraries = Seq(
@@ -36,18 +36,19 @@ lazy val libraries = Seq(
   "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle"           % tapirVersion,
   "dev.zio"                     %% "zio-logging"                       % zioLoggingVersion,
   "dev.zio"                     %% "zio-logging-slf4j"                 % zioLoggingVersion,
-  "ch.qos.logback"               % "logback-classic"                   % "1.4.1",
+  "ch.qos.logback"               % "logback-classic"                   % "1.4.3",
   "dev.zio"                     %% "zio-test"                          % zioVersion,
   "dev.zio"                     %% "zio-test-sbt"                      % zioVersion % "it, test",
   "dev.zio"                     %% "zio-test-magnolia"                 % zioVersion % "it, test",
-  "dev.zio"                     %% "zio-mock"                          % "1.0.0-RC8" % "it, test",
+  "dev.zio"                     %% "zio-mock"                          % "1.0.0-RC9" % "it, test",
   "dev.zio"                     %% "zio-config"                        % zioConfigVersion,
   "dev.zio"                     %% "zio-config-magnolia"               % zioConfigVersion,
   "dev.zio"                     %% "zio-config-typesafe"               % zioConfigVersion,
-  "io.getquill"                 %% "quill-jdbc-zio"                    % "4.4.1",
+  "io.getquill"                 %% "quill-jdbc-zio"                    % "4.6.0",
   "org.postgresql"               % "postgresql"                        % "42.5.0",
-  "org.flywaydb"                 % "flyway-core"                       % "9.3.1",
-  "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.8.0"
+  "org.flywaydb"                 % "flyway-core"                       % "9.4.0",
+  "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.9.0",
+  "dev.zio"                     %% "zio-prelude"                       % "1.0.0-RC16"
 )
 
 lazy val root = (project in file("."))

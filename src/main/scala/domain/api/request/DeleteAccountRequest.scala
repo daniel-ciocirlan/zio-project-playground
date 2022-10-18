@@ -8,5 +8,6 @@ case class DeleteAccountRequest(
 )
 
 object DeleteAccountRequest {
-  implicit val codec: JsonCodec[DeleteAccountRequest] = DeriveJsonCodec.gen[DeleteAccountRequest]
+  implicit val codec: JsonCodec[DeleteAccountRequest] =
+    DeriveJsonCodec.gen[DeleteAccountRequest]
 }
