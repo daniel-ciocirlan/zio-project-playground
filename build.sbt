@@ -47,7 +47,8 @@ lazy val libraries = Seq(
   "io.getquill"                 %% "quill-jdbc-zio"                    % "4.6.0",
   "org.postgresql"               % "postgresql"                        % "42.5.0",
   "org.flywaydb"                 % "flyway-core"                       % "9.4.0",
-  "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.9.0"
+  "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.9.0",
+  "dev.zio"                     %% "zio-prelude"                       % "1.0.0-RC16"
 )
 
 lazy val root = (project in file("."))

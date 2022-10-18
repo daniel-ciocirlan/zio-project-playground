@@ -21,10 +21,10 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
   implicit val schema =
     schemaMeta[UserRecord]("users")
 
-  implicit val userInsertMeta =
+  implicit val insMeta =
     insertMeta[UserRecord](_.id)
 
-  implicit val userUpdateMeta =
+  implicit val upMeta =
     updateMeta[UserRecord](_.id)
 
   override def create(record: UserRecord): Task[UserRecord] =
