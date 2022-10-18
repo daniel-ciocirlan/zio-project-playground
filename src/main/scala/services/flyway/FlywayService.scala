@@ -1,5 +1,6 @@
 package services.flyway
 
+import com.dimafeng.testcontainers.PostgreSQLContainer
 import org.flywaydb.core.Flyway
 import services.config.ConfigService
 import zio._
@@ -114,4 +115,15 @@ object FlywayServiceLive {
 
   }
 
+  val testContainerLayer
+      : ZLayer[PostgreSQLContainer with Scope, Throwable, FlywayService] =
+    ZLayer {
+      for {
+        container <- ZIO.service[PostgreSQLContainer]
+      } yield services.flyway.Config(
+        url = container.jdbcUrl,
+        user = container.username,
+        password = container.password
+      )
+    } >>> layer
 }

@@ -55,7 +55,8 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
     run(query[UserRecord].filter(_.id == lift(id)).delete.returning(r => r))
 
   override def getByUserName(username: String): Task[Option[UserRecord]] =
-    run(query[UserRecord].filter(_.userName == lift(username))).map(_.headOption)
+    run(query[UserRecord].filter(_.userName == lift(username)))
+      .map(_.headOption)
 }
 
 object UserRepositoryLive {

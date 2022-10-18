@@ -55,5 +55,4 @@ case class CompanyController() extends BaseController {
       .in("companies" / path[String]("id"))
       .get
 
-
 }

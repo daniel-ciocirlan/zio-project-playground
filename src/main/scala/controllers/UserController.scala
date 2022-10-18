@@ -1,6 +1,10 @@
 package controllers
 
-import domain.api.request.{DeleteAccountRequest, RegisterRequest, UpdatePasswordRequest}
+import domain.api.request.{
+  DeleteAccountRequest,
+  RegisterRequest,
+  UpdatePasswordRequest
+}
 import domain.api.response.User
 import services.user.UserService
 import sttp.tapir._
