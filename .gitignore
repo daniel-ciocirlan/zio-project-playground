@@ -165,3 +165,7 @@ project/plugins/project/
 
 # Don't rack anything from .idea
 .idea
+
+.vscode
+.metals
+metals.sbt
