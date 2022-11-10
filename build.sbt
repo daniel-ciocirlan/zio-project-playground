@@ -36,7 +36,8 @@ lazy val app = (project in file("app"))
   .settings(
     name                            := "zio-project-playground-app",
     libraryDependencies ++= Seq(
-      "com.raquo" %%% "laminar" % "0.14.5"
+//      "com.raquo"     %%% "laminar"    % "0.14.5",
+      "io.frontroute" %%% "frontroute" % "0.16.1" // Brings in Laminar
     ),
     scalaJSUseMainModuleInitializer := true,
     Compile / mainClass             := Some("Main")
