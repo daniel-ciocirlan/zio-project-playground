@@ -1,3 +1,4 @@
+import com.raquo.airstream.core.EventStream
 import com.raquo.laminar.api.L._
 import endpoints.HealthEndpoints
 import io.frontroute._
@@ -34,7 +35,13 @@ object Main {
     val backend         = FetchBackend()
     val healthEndpoints = new HealthEndpoints {}
 
-    val timeVar: Var[Instant] = Var(Instant.now())
+    // When we click a button, we will emit a Future that will fetch the current time
+    val timeBus: EventBus[Future[Instant]] = new EventBus
+    val processedTime                      = timeBus.events
+      .flatMap(f =>
+        EventStream.fromFuture(f)
+      ) // Flatten out our value from the Future
+      .map(_.toString())
 
     val timeRequest: Unit => Request[Instant, Any] = {
       SttpClientInterpreter().toRequestThrowErrors(
@@ -43,16 +50,24 @@ object Main {
       )
     }
 
-    /// Working on this part...
+    /// Working on this part... needs to fix CORS
     def fetchTime(): Future[Instant] =
       backend.send(timeRequest(())).map(_.body)
-    EventStream.fromFuture(fetchTime())
+
+    def fakeIt(): Future[Instant] = {
+      Future(Instant.now())
+    }
 
     val timePage = Page(
       h1("The current time is"),
       p(
-        child.text <-- timeVar.toObservable.map(_.toString())
-      )
+        child.text <-- processedTime,
+        onMountCallback { _ =>
+          // Seed the initial time
+          timeBus.emit(fakeIt())
+        }
+      ),
+      button("refresh", onClick.mapTo(fakeIt()) --> timeBus)
     )
 
     val routedSite = div(
