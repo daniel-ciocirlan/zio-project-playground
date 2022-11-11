@@ -1,6 +1,8 @@
 package endpoints
 
-import sttp.tapir.{Endpoint, plainBody}
+import sttp.tapir._
+
+import java.time.Instant
 
 trait HealthEndpoints extends BaseEndpoint {
 
@@ -13,4 +15,12 @@ trait HealthEndpoints extends BaseEndpoint {
       .in("health")
       .out(plainBody[String])
 
+  val timeEndpoint: Endpoint[Unit, Unit, Throwable, Instant, Any] =
+    baseEndpoint
+      .tag("time")
+      .name("currentTime")
+      .description("Get the current time")
+      .get
+      .in("health" / "time")
+      .out(plainBody[Instant])
 }
