@@ -48,6 +48,14 @@ object NavBar {
                 href      := "/about",
                 "About"
               )
+            ),
+            li(
+              className := "nav-item",
+              a(
+                className := "nav-link",
+                href      := "/time",
+                "Current Time"
+              )
             )
           ),
           ul(
