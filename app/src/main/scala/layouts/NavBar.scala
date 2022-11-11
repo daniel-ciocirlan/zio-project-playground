@@ -1,6 +1,5 @@
 package layouts
 
-import org.scalajs.dom
 import com.raquo.laminar.api.L._
 
 object NavBar {
