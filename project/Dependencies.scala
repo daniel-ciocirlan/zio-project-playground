@@ -6,6 +6,7 @@ object Dependencies {
   val tapirVersion      = "1.2.0"
   val zioLoggingVersion = "2.1.3"
   val zioConfigVersion  = "3.0.2"
+  val sttpVersion       = "3.8.3"
 
   val server: Seq[ModuleID] = Seq(
 //  "dev.zio"                     %% "zio"                     % "2.0.0",
@@ -13,7 +14,6 @@ object Dependencies {
 //  "dev.zio"                     %% "zio-json"                % "0.3.0-RC8",
     "com.softwaremill.sttp.tapir" %% "tapir-zio"                         % tapirVersion, // Brings in zio, zio-streams
     "com.softwaremill.sttp.tapir" %% "tapir-zio-http-server"             % tapirVersion, // Brings in zhttp
-    "com.softwaremill.sttp.tapir" %% "tapir-sttp-client"                 % tapirVersion,
     "com.softwaremill.sttp.tapir" %% "tapir-swagger-ui-bundle"           % tapirVersion,
     "dev.zio"                     %% "zio-logging"                       % zioLoggingVersion,
     "dev.zio"                     %% "zio-logging-slf4j"                 % zioLoggingVersion,
