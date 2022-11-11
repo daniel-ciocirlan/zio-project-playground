@@ -20,17 +20,29 @@ lazy val root = (project in file("."))
     name := "zio-project-playground"
   )
   .aggregate(server, app)
+  .dependsOn(server, app)
+
+lazy val common = crossProject(JVMPlatform, JSPlatform)
+  .crossType(CrossType.Pure)
+  .in(file("common"))
+  .settings(
+    name := "zio-project-playground-common",
+    libraryDependencies ++= Seq(
+      "com.softwaremill.sttp.tapir" %%% "tapir-core"     % Dependencies.tapirVersion,
+      "com.softwaremill.sttp.tapir" %%% "tapir-json-zio" % Dependencies.tapirVersion // brings in zio-json
+
+    )
+  )
 
 lazy val server = (project in file("server"))
   .configs(IntegrationTest)
   .settings(
-    name                   := "zio-project-playground-server",
+    name := "zio-project-playground-server",
     libraryDependencies ++= Dependencies.server,
     Defaults.itSettings,
-    ThisBuild / fork       := true,
-    Test / fork            := true,
-    IntegrationTest / fork := true
+    fork := true
   )
+  .dependsOn(common.jvm)
 
 lazy val app = (project in file("app"))
   .settings(
@@ -42,6 +54,7 @@ lazy val app = (project in file("app"))
     scalaJSUseMainModuleInitializer := true,
     Compile / mainClass             := Some("Main")
   )
+  .dependsOn(common.js)
   .enablePlugins(ScalaJSPlugin)
 
 addCommandAlias("fmt", "all root/scalafmtSbt root/scalafmtAll")

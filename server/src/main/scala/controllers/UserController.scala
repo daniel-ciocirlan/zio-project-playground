@@ -6,10 +6,8 @@ import domain.api.request.{
   UpdatePasswordRequest
 }
 import domain.api.response.User
+import endpoints.UserEndpoints
 import services.user.UserService
-import sttp.tapir._
-import sttp.tapir.generic.auto.schemaForCaseClass
-import sttp.tapir.json.zio.jsonBody
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
 import zio._
@@ -20,31 +18,19 @@ object UserController {
   } yield UserController(service)
 }
 
-case class UserController(userService: UserService) extends BaseController {
+case class UserController(userService: UserService)
+    extends BaseController
+    with UserEndpoints {
 
   val register: Full[Unit, Unit, RegisterRequest, Throwable, User, Any, Task] =
-    baseEndpoint
-      .tag("users")
-      .name("register")
-      .description("Register a user account with username and password")
-      .in("users")
-      .post
-      .in(jsonBody[RegisterRequest])
-      .out(jsonBody[User])
+    registerEndpoint
       .serverLogic[Task](req =>
         userService.registerUser(req.userName, req.password).either
       )
 
   val updatePassword
       : Full[Unit, Unit, UpdatePasswordRequest, Throwable, User, Any, Task] =
-    baseEndpoint
-      .tag("users")
-      .name("update password")
-      .description("Update account password")
-      .in("users" / "password")
-      .put
-      .in(jsonBody[UpdatePasswordRequest])
-      .out(jsonBody[User])
+    updatePasswordEndpoint
       .serverLogic[Task](req =>
         userService
           .updatePassword(req.userName, req.oldPassword, req.newPassword)
@@ -53,14 +39,7 @@ case class UserController(userService: UserService) extends BaseController {
 
   val delete
       : Full[Unit, Unit, DeleteAccountRequest, Throwable, User, Any, Task] =
-    baseEndpoint
-      .tag("users")
-      .name("delete account")
-      .description("Delete your account")
-      .in("users")
-      .delete
-      .in(jsonBody[DeleteAccountRequest])
-      .out(jsonBody[User])
+    deleteEndpoint
       .serverLogic[Task](req =>
         userService.deleteAccount(req.userName, req.password).either
       )

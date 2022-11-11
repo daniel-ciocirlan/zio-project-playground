@@ -1,6 +1,6 @@
 package controllers
 
-import sttp.tapir._
+import endpoints.CompanyEndpoints
 import zio.ZIO
 
 object CompanyController {
@@ -8,51 +8,31 @@ object CompanyController {
     ZIO.succeed(CompanyController())
 }
 
-case class CompanyController() extends BaseController {
+case class CompanyController() extends BaseController with CompanyEndpoints {
 
   // Will probably want to bring in the concept of an admin user...
 
   val create =
-    baseEndpoint
-      .tag("Companies")
-      .name("create")
-      .description("Create a listing for a Company")
-      .in("companies")
-      .post
+    createEndpoint
+      .serverLogic(???)
 
   val update =
-    baseEndpoint
-      .tag("Companies")
-      .name("update")
-      .description("Update a listing for a Company")
-      .in("companies" / path[String]("id"))
-      .put
+    updateEndpoint
+      .serverLogic(???)
 
   val delete =
-    baseEndpoint
-      .tag("Companies")
-      .name("delete")
-      .description("Delete a listing for a Company")
-      .in("companies" / path[String]("id"))
-      .delete
+    deleteEndpoint
+      .serverLogic(???)
 
   // Should be paged
   // Probably default to alphabetical, but add by rating.
   // Maybe other sort / search filters
   val get =
-    baseEndpoint
-      .tag("Companies")
-      .tag("get")
-      .description("Get all company listings")
-      .in("companies")
-      .get
+    getAllEndpoint
+      .serverLogic(???)
 
   val getById =
-    baseEndpoint
-      .tag("Companies")
-      .name("getById")
-      .description("Get a company by it's id")
-      .in("companies" / path[String]("id"))
-      .get
+    getByIdEndpoint
+      .serverLogic(???)
 
 }

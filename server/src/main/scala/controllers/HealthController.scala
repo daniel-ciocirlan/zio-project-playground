@@ -1,6 +1,6 @@
 package controllers
 
-import sttp.tapir.plainBody
+import endpoints.HealthEndpoints
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
 import zio._
@@ -17,18 +17,12 @@ object HealthController {
 
 /** A Controller collecting health related endpoints.
   */
-case class HealthController() extends BaseController {
+case class HealthController() extends BaseController with HealthEndpoints {
 
   /** 200 "ok" at /health
     */
   val healthRoute: Full[Unit, Unit, Unit, Throwable, String, Any, Task] =
-    baseEndpoint
-      .tag("health")                        // swagger tag
-      .name("Health")                       // swagger name
-      .description("Health-check endpoint") // swagger description
-      .get
-      .in("health")
-      .out(plainBody[String])
+    healthEndpoint
       .serverLogicSuccess(_ => ZIO.succeed("ok"))
 
   override val routes: List[ServerEndpoint[Any, Task]] = List(
