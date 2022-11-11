@@ -5,6 +5,8 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
 import zio._
 
+import java.time.Instant
+
 object HealthController {
 
   /** A ZIO constructor for our implementation (NOT a ZLayer!). See
@@ -25,8 +27,13 @@ case class HealthController() extends BaseController with HealthEndpoints {
     healthEndpoint
       .serverLogicSuccess(_ => ZIO.succeed("ok"))
 
+  val timeRoute: Full[Unit, Unit, Unit, Throwable, Instant, Any, Task] =
+    timeEndpoint
+      .serverLogicSuccess[Task](_ => Clock.instant)
+
   override val routes: List[ServerEndpoint[Any, Task]] = List(
-    healthRoute
+    healthRoute,
+    timeRoute
   )
 
 }
