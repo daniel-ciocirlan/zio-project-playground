@@ -50,13 +50,8 @@ object Main {
       )
     }
 
-    /// Working on this part... needs to fix CORS
     def fetchTime(): Future[Instant] =
       backend.send(timeRequest(())).map(_.body)
-
-    def fakeIt(): Future[Instant] = {
-      Future(Instant.now())
-    }
 
     val timePage = Page(
       h1("The current time is"),
@@ -64,10 +59,10 @@ object Main {
         child.text <-- processedTime,
         onMountCallback { _ =>
           // Seed the initial time
-          timeBus.emit(fakeIt())
+          timeBus.emit(fetchTime())
         }
       ),
-      button("refresh", onClick.mapTo(fakeIt()) --> timeBus)
+      button("refresh", onClick.mapTo(fetchTime()) --> timeBus)
     )
 
     val routedSite = div(
