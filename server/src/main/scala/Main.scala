@@ -5,7 +5,6 @@ import repositories.users.UserRepositoryLive
 import services.flyway.{FlywayService, FlywayServiceLive}
 import services.user.{UserService, UserServiceLive}
 import sttp.tapir.server.ServerEndpoint
-import sttp.tapir.server.interceptor.RequestInterceptor
 import sttp.tapir.server.interceptor.cors.CORSInterceptor
 import sttp.tapir.server.ziohttp.{ZioHttpInterpreter, ZioHttpServerOptions}
 import sttp.tapir.swagger.bundle.SwaggerInterpreter
