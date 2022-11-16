@@ -29,7 +29,8 @@ object Dependencies {
     "org.postgresql"               % "postgresql"                        % "42.5.0",
     "org.flywaydb"                 % "flyway-core"                       % "9.7.0",
     "io.github.scottweaver"       %% "zio-2-0-testcontainers-postgresql" % "0.9.0",
-    "dev.zio"                     %% "zio-prelude"                       % "1.0.0-RC16"
+    "dev.zio"                     %% "zio-prelude"                       % "1.0.0-RC16",
+    "com.auth0"                    % "java-jwt"                          % "4.2.1"
   )
 
 }
