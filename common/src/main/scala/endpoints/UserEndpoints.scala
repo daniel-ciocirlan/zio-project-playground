@@ -1,30 +1,26 @@
 package endpoints
 
-import domain.api.request.{
-  DeleteAccountRequest,
-  RegisterRequest,
-  UpdatePasswordRequest
-}
-import domain.api.response.User
+import domain.api.request.{DeleteAccountRequest, LoginForm, RegisterAccountRequest, UpdatePasswordRequest}
+import domain.api.response.{TokenResponse, User}
 import sttp.tapir._
 import sttp.tapir.generic.auto.schemaForCaseClass
-import sttp.tapir.json.zio.jsonBody
+import sttp.tapir.json.zio._
 
 trait UserEndpoints extends BaseEndpoint {
 
-  val registerEndpoint: Endpoint[Unit, RegisterRequest, Throwable, User, Any] =
+  val registerEndpoint: Endpoint[Unit, RegisterAccountRequest, Throwable, User, Any] =
     baseEndpoint
       .tag("users")
       .name("register")
       .description("Register a user account with username and password")
       .in("users")
       .post
-      .in(jsonBody[RegisterRequest])
+      .in(jsonBody[RegisterAccountRequest])
       .out(jsonBody[User])
 
   val updatePasswordEndpoint
-      : Endpoint[Unit, UpdatePasswordRequest, Throwable, User, Any] =
-    baseEndpoint
+      : Endpoint[String, UpdatePasswordRequest, Throwable, User, Any] =
+    secureBearerEndpoint
       .tag("users")
       .name("update password")
       .description("Update account password")
@@ -33,8 +29,8 @@ trait UserEndpoints extends BaseEndpoint {
       .in(jsonBody[UpdatePasswordRequest])
       .out(jsonBody[User])
 
-  val deleteEndpoint: Endpoint[Unit, DeleteAccountRequest, Throwable, User, Any] =
-    baseEndpoint
+  val deleteEndpoint: Endpoint[String, DeleteAccountRequest, Throwable, User, Any] =
+    secureBearerEndpoint
       .tag("users")
       .name("delete account")
       .description("Delete your account")
@@ -43,4 +39,13 @@ trait UserEndpoints extends BaseEndpoint {
       .in(jsonBody[DeleteAccountRequest])
       .out(jsonBody[User])
 
+  val generateTokenEndpoint =
+    baseEndpoint
+      .tag("users")
+      .name("generate token")
+      .description("Return a user JWT")
+      .post
+      .in("users" / "login")
+      .in(jsonBody[LoginForm])
+      .out(jsonBody[TokenResponse])
 }

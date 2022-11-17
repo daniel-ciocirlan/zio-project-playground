@@ -1,10 +1,11 @@
 package services.user
 
-import domain.api.response.User
+import domain.api.response.{TokenResponse, User}
 import domain.errors.DatabaseError
 import domain.records.UserRecord
 import extensions.Conversions.ConversionExtension
 import repositories.users.UserRepository
+import services.jwt.JWTService
 import zio._
 
 import java.security.SecureRandom
@@ -22,9 +23,16 @@ trait UserService {
   ): Task[User]
   def deleteAccount(userName: String, password: String): Task[User]
 
+  def generateToken(
+      userName: String,
+      password: String
+  ): Task[Option[TokenResponse]]
 }
 
-case class UserServiceLive(userRepository: UserRepository) extends UserService {
+case class UserServiceLive(
+    userRepository: UserRepository,
+    jwtService: JWTService
+) extends UserService {
 
   private val PBKDF2_ALGORITHM: String = "PBKDF2WithHmacSHA512"
   private val SALT_BYTE_SIZE: Int      = 24
@@ -177,14 +185,31 @@ case class UserServiceLive(userRepository: UserRepository) extends UserService {
           .map(_.to[User])
     } yield result
   }
+
+  override def generateToken(
+      userName: String,
+      password: String
+  ): Task[Option[TokenResponse]] =
+    for {
+      existingUser <- userRepository
+                        .getByUserName(userName)
+                        .someOrFail(DatabaseError("User does not exist", null))
+      verified     <- ZIO.attempt(validatePbkdf2Hash(password, existingUser.pwHash))
+      tokenOpt     <- jwtService
+                        .createToken(existingUser)
+                        .when(verified)
+    } yield tokenOpt.map(t => TokenResponse(accessToken = t))
+
 }
 
 object UserServiceLive {
 
-  val layer: ZLayer[UserRepository, Nothing, UserService] = ZLayer {
-    for {
-      repo <- ZIO.service[UserRepository]
-    } yield UserServiceLive(repo)
-  }
+  val layer: ZLayer[UserRepository with JWTService, Nothing, UserService] =
+    ZLayer {
+      for {
+        repo <- ZIO.service[UserRepository]
+        jwt  <- ZIO.service[JWTService]
+      } yield UserServiceLive(repo, jwt)
+    }
 
 }

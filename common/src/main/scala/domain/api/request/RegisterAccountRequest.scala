@@ -2,12 +2,12 @@ package domain.api.request
 
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
-case class RegisterRequest(
+case class RegisterAccountRequest(
     userName: String,
     password: String
 )
 
-object RegisterRequest {
-  implicit val codec: JsonCodec[RegisterRequest] =
-    DeriveJsonCodec.gen[RegisterRequest]
+object RegisterAccountRequest {
+  implicit val codec: JsonCodec[RegisterAccountRequest] =
+    DeriveJsonCodec.gen[RegisterAccountRequest]
 }
