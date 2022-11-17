@@ -3,6 +3,7 @@ import org.flywaydb.core.api.FlywayException
 import repositories.Repository
 import repositories.users.UserRepositoryLive
 import services.flyway.{FlywayService, FlywayServiceLive}
+import services.jwt.{JWTService, JWTServiceLive}
 import services.user.{UserService, UserServiceLive}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.interceptor.cors.CORSInterceptor
@@ -26,7 +27,8 @@ object Main extends ZIOAppDefault {
     *
     * @return
     */
-  def makeControllers: ZIO[UserService, Nothing, Seq[BaseController]] = for {
+  def makeControllers
+      : ZIO[UserService with JWTService, Nothing, Seq[BaseController]] = for {
     health <- HealthController.makeZIO
     users  <- UserController.makeZIO
   } yield Seq(health, users)
@@ -58,7 +60,11 @@ object Main extends ZIOAppDefault {
 
   /** Our main server application
     */
-  val program: ZIO[UserService with FlywayService, Throwable, ExitCode] = for {
+  val program: ZIO[
+    UserService with FlywayService with JWTService,
+    Throwable,
+    ExitCode
+  ] = for {
     _           <- initMigrations
     controllers <- makeControllers
     routes      <- gatherRoutes(controllers)
@@ -84,6 +90,7 @@ object Main extends ZIOAppDefault {
         FlywayServiceLive.configuredLayer,
         UserRepositoryLive.layer,
         UserServiceLive.layer,
+        JWTServiceLive.configuredLayer,
         Runtime.removeDefaultLoggers >>> SLF4J.slf4j // Make sure our ZIO.log's use slf4j
       )
 }

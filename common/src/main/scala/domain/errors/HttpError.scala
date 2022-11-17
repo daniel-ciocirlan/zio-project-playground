@@ -14,6 +14,9 @@ final case class HttpError(
     cause: Throwable
 ) extends ApplicationServerException(message, cause)
 
+case object UnauthorizedException
+    extends ApplicationServerException("Unauthorized", null)
+
 object HttpError {
 
   /** A method used via tapir to decode a response tuple to an [[HttpError]]
@@ -37,6 +40,7 @@ object HttpError {
     * @return
     */
   def mapException(t: Throwable): (StatusCode, String) = t match {
-    case _ => (StatusCode.InternalServerError, t.getMessage)
+    case UnauthorizedException => (StatusCode.Unauthorized, t.getMessage)
+    case _                     => (StatusCode.InternalServerError, t.getMessage)
   }
 }

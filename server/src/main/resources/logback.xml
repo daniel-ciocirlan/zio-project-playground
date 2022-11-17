@@ -10,5 +10,6 @@
     </root>
 
     <logger name="io.netty" level="ERROR"/>
+    <logger name="com.zaxxer.hikari.pool" level="ERROR"/>
 
 </configuration>

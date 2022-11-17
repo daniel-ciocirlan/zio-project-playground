@@ -6,6 +6,7 @@ import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import repositories.Repository
 import repositories.users.UserRepositoryLive
 import services.flyway.{FlywayService, FlywayServiceLive}
+import services.jwt.{JWTService, JWTServiceLive}
 import zio._
 import zio.test.{assertTrue, Spec, TestAspect, TestEnvironment, ZIOSpecDefault}
 
@@ -17,7 +18,7 @@ object UserServiceITSpec extends ZIOSpecDefault {
   val firstPassword: String  = "abc123"
   val secondPassword: String = "babyunme"
 
-  val tests: Spec[FlywayService with UserService, Object] =
+  val tests: Spec[FlywayService with UserService with JWTService, Object] =
     suite("UserService")(
       test("register")(
         for {
@@ -82,7 +83,21 @@ object UserServiceITSpec extends ZIOSpecDefault {
           fail.isInstanceOf[DatabaseError],
           result.userName == userName
         )
-      )
+      ),
+      test("generate valid token") {
+        for {
+          insert    <- ZIO.serviceWithZIO[UserService](
+                         _.registerUser(userName, firstPassword)
+                       )
+          token     <- ZIO
+                         .serviceWithZIO[UserService](
+                           _.generateToken(userName, firstPassword)
+                         )
+                         .someOrFail(new Exception("could verify inserted user"))
+          validated <-
+            ZIO.serviceWithZIO[JWTService](_.verifyToken(token.accessToken))
+        } yield assertTrue(validated.userName == insert.userName)
+      }
     ) @@ TestAspect.sequential @@ TestAspect.beforeAll(
       ZIO
         .serviceWithZIO[FlywayService](_.runMigrations)
@@ -95,7 +110,8 @@ object UserServiceITSpec extends ZIOSpecDefault {
       Repository.quillPostgresLayer,
       UserRepositoryLive.layer,
       UserServiceLive.layer,
-      FlywayServiceLive.testContainerLayer
+      FlywayServiceLive.testContainerLayer,
+      JWTServiceLive.configuredLayer
     ).provideSomeLayerShared[Scope](
       ZPostgreSQLContainer.Settings.default >>> ZPostgreSQLContainer.live
     )
