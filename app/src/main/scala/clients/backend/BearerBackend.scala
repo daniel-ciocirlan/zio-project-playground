@@ -4,7 +4,7 @@ import domain.api.response.TokenResponse
 import sttp.capabilities
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3.{DelegateSttpBackend, Request, Response, SttpBackend}
-import zio.{Task, ZIO}
+import zio.{Task, ZIO, ZLayer}
 import org.scalajs.dom
 
 case class BearerBackend(
@@ -39,4 +39,17 @@ case class BearerBackend(
       }
 
   }
+}
+
+object BearerBackend {
+
+  val layer: ZLayer[SttpBackend[Task, ZioStreams], Nothing, SttpBackend[
+    Task,
+    ZioStreams
+  ]] = ZLayer {
+    for {
+      delegate <- ZIO.service[SttpBackend[Task, ZioStreams]]
+    } yield BearerBackend(delegate).asInstanceOf[SttpBackend[Task, ZioStreams]]
+  }
+
 }
