@@ -1,14 +1,14 @@
-import clients.backend.BackEndClientLive
+import clients.backend.BackEndClient
 import com.raquo.airstream.core.EventStream
 import com.raquo.laminar.api.L._
 import domain.api.request.{LoginForm, RegisterAccountRequest}
+import helpers.ZJS.{AppEnv, ExtendedZIO}
 import io.frontroute._
 import layouts.Page
 import org.scalajs.dom
-import zio.Unsafe
+import zio.ZIO
 
 import java.time.Instant
-import scala.concurrent.Future
 
 object Main {
 
@@ -31,42 +31,32 @@ object Main {
       p("Stuff about registering too")
     )
 
-    val runtime = zio.Runtime.default
-    val client  = BackEndClientLive.live
+    val client: ZIO.ServiceWithZIOPartiallyApplied[AppEnv] =
+      ZIO.serviceWithZIO[BackEndClient]
 
-    // When we click a button, we will emit a Future that will fetch the current time
-    val timeBus: EventBus[Future[Instant]] = new EventBus
-    val processedTime                      = timeBus.events
-      .flatMap(f =>
-        EventStream.fromFuture(f)
-      ) // Flatten out our value from the Future
+    val timeBus: EventBus[Instant]                            = new EventBus
+    val zioTimeBus: EventBus[ZIO[AppEnv, Throwable, Instant]] = new EventBus
+    val processedTime: EventStream[String]                    = EventStream
+      .merge(
+        timeBus.events,
+        zioTimeBus.events.flatMap(z => EventStream.fromFuture(z.runJs))
+      )
       .map(_.toString())
 
     // quick hack - create user on load
-    def fetchTimeInit(): Future[Instant] = {
-      Unsafe.unsafe { implicit unsafe =>
-        runtime.unsafe.runToFuture(
-          for {
-            _    <- client
-                      .createAccount(RegisterAccountRequest("me", "pass123"))
-                      .ignore // silently fail if user already exists
-            _    <- client.fetchToken(
-                      LoginForm(username = "me", password = "pass123")
-                    )
-            time <- client.fetchTimeSecure()
-          } yield time
-        )
-      }
-    }
-
-    def fetchTime(): Future[Instant] = {
-      Unsafe.unsafe { implicit unsafe =>
-        runtime.unsafe.runToFuture(
-          for {
-            time <- client.fetchTimeSecure()
-          } yield time
-        )
-      }
+    def fetchTimeInit(): Unit = {
+      val effect = for {
+        _    <- client(
+                  _.createAccount(RegisterAccountRequest("me", "pass123"))
+                ).ignore // silently fail if user already exists
+        _    <- client(
+                  _.fetchToken(
+                    LoginForm(username = "me", password = "pass123")
+                  )
+                )
+        time <- client(_.fetchTimeSecure())
+      } yield time
+      effect.emitTo(timeBus)
     }
 
     val timePage = Page(
@@ -75,10 +65,13 @@ object Main {
         child.text <-- processedTime,
         onMountCallback { _ =>
           // Seed the initial time
-          timeBus.emit(fetchTimeInit())
+          fetchTimeInit()
         }
       ),
-      button("refresh", onClick.mapTo(fetchTime()) --> timeBus)
+      button(
+        "refresh",
+        onClick.mapTo(client(_.fetchTimeSecure())) --> zioTimeBus
+      )
     )
 
     val routedSite = div(
