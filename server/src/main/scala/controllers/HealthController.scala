@@ -1,6 +1,7 @@
 package controllers
 
 import endpoints.HealthEndpoints
+import services.jwt.{JWTService, ValidatedUserToken}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
 import zio._
@@ -12,14 +13,18 @@ object HealthController {
   /** A ZIO constructor for our implementation (NOT a ZLayer!). See
     * [[_root_.Main.makeControllers]]
     */
-  val makeZIO: UIO[HealthController] =
-    ZIO.succeed(HealthController())
+  val makeZIO: ZIO[JWTService, Nothing, HealthController] =
+    for {
+      jwt <- ZIO.service[JWTService]
+    } yield HealthController(jwt)
 
 }
 
 /** A Controller collecting health related endpoints.
   */
-case class HealthController() extends BaseController with HealthEndpoints {
+case class HealthController(jwtService: JWTService)
+    extends BaseController
+    with HealthEndpoints {
 
   /** 200 "ok" at /health
     */
@@ -31,9 +36,26 @@ case class HealthController() extends BaseController with HealthEndpoints {
     timeEndpoint
       .serverLogicSuccess[Task](_ => Clock.instant)
 
+  val secureTimeRoute: Full[
+    String,
+    ValidatedUserToken,
+    Unit,
+    Throwable,
+    Instant,
+    Any,
+    Task
+  ] = {
+    secureTimeEndpoint
+      .serverSecurityLogic[ValidatedUserToken, Task](token =>
+        jwtService.verifyToken(token).either
+      )
+      .serverLogicSuccess(_ => _ => Clock.instant)
+  }
+
   override val routes: List[ServerEndpoint[Any, Task]] = List(
     healthRoute,
-    timeRoute
+    timeRoute,
+    secureTimeRoute
   )
 
 }

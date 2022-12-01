@@ -1,6 +1,6 @@
 package domain.api.request
 
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import upickle.default._
 
 case class DeleteAccountRequest(
     userName: String,
@@ -8,6 +8,6 @@ case class DeleteAccountRequest(
 )
 
 object DeleteAccountRequest {
-  implicit val codec: JsonCodec[DeleteAccountRequest] =
-    DeriveJsonCodec.gen[DeleteAccountRequest]
+  implicit val rw: ReadWriter[DeleteAccountRequest] = macroRW
+
 }

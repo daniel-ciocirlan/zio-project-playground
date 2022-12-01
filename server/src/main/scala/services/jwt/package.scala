@@ -2,7 +2,7 @@ package services
 
 package object jwt {
 
-  case class Config(
+  case class JwtConfig(
       secret: Option[String],
       ttl: Int
   )

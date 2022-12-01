@@ -23,4 +23,13 @@ trait HealthEndpoints extends BaseEndpoint {
       .get
       .in("health" / "time")
       .out(plainBody[Instant])
+
+  val secureTimeEndpoint: Endpoint[String, Unit, Throwable, Instant, Any] =
+    secureBearerEndpoint
+      .tag("time")
+      .name("secureTime")
+      .description("Get the current time as an authed user")
+      .get
+      .in("health" / "sec-time")
+      .out(plainBody[Instant])
 }
