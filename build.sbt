@@ -28,14 +28,15 @@ lazy val common = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "zio-project-playground-common",
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir"   %%% "tapir-sttp-client" % Dependencies.tapirVersion,
-      "com.softwaremill.sttp.tapir"   %%% "tapir-json-zio"    % Dependencies.tapirVersion, // brings in zio-json
-      "com.softwaremill.sttp.client3" %%% "zio"               % Dependencies.sttpVersion
+      "com.softwaremill.sttp.tapir"   %%% "tapir-sttp-client"  % Dependencies.tapirVersion,
+//      "com.softwaremill.sttp.tapir"   %%% "tapir-json-zio"     % Dependencies.tapirVersion, // brings in zio-json
+      "com.softwaremill.sttp.tapir"   %%% "tapir-json-upickle" % Dependencies.tapirVersion,
+      "com.softwaremill.sttp.client3" %%% "zio"                % Dependencies.sttpVersion
     )
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % "2.2.0" // implementations of java.time classes for Scala.JS
+      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" // implementations of java.time classes for Scala.JS
     )
   )
 

@@ -13,8 +13,8 @@ object JWTServiceSpec extends ZIOSpecDefault {
   val JWTService: ZIO.ServiceWithZIOPartiallyApplied[JWTService] =
     ZIO.serviceWithZIO[JWTService]
 
-  val tokenTtl           = 10
-  val someConfig: Config = Config(secret = Option.empty, ttl = tokenTtl)
+  val tokenTtl              = 10
+  val someConfig: JwtConfig = JwtConfig(secret = Option.empty, ttl = tokenTtl)
 
   val tests = suite("JWTService")(
     test("generate / validate token") {

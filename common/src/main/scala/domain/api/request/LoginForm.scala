@@ -1,9 +1,10 @@
 package domain.api.request
 
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import upickle.default._
 
 case class LoginForm(username: String, password: String)
 
 object LoginForm {
-  implicit val codec: JsonCodec[LoginForm] = DeriveJsonCodec.gen[LoginForm]
+  implicit val rw: ReadWriter[LoginForm] = macroRW
+
 }

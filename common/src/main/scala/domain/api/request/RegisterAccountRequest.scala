@@ -1,6 +1,6 @@
 package domain.api.request
 
-import zio.json.{DeriveJsonCodec, JsonCodec}
+import upickle.default._
 
 case class RegisterAccountRequest(
     userName: String,
@@ -8,6 +8,6 @@ case class RegisterAccountRequest(
 )
 
 object RegisterAccountRequest {
-  implicit val codec: JsonCodec[RegisterAccountRequest] =
-    DeriveJsonCodec.gen[RegisterAccountRequest]
+  implicit val rw: ReadWriter[RegisterAccountRequest] = macroRW
+
 }

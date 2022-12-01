@@ -10,7 +10,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "8080:80"
+      - "3000:80"
     volumes:
       - ./app/src/main/resources/index.html:/usr/share/nginx/html/index.html
       - ./app/target/scala-2.13/zio-project-playground-app-fastopt.js:/usr/share/nginx/html/zio-project-playground-app-fastopt.js

@@ -2,9 +2,9 @@ import sbt._
 
 object Dependencies {
 
-  val zioVersion        = "2.0.2"
-  val tapirVersion      = "1.2.0"
-  val zioLoggingVersion = "2.1.3"
+  val zioVersion        = "2.0.4"
+  val tapirVersion      = "1.2.3"
+  val zioLoggingVersion = "2.1.5"
   val zioConfigVersion  = "3.0.2"
   val sttpVersion       = "3.8.3"
 

@@ -1,12 +1,11 @@
 package domain.api.response
 
-import zio.json._
+import upickle.default._
 
 case class TokenResponse(
     accessToken: String
 )
 
 object TokenResponse {
-  implicit val codec: JsonCodec[TokenResponse] =
-    DeriveJsonCodec.gen[TokenResponse]
+  implicit val rw: ReadWriter[TokenResponse] = macroRW
 }

@@ -14,7 +14,7 @@ trait JWTService {
   def verifyToken(token: String): Task[ValidatedUserToken]
 }
 
-case class JWTServiceLive(config: Config, javaClock: java.time.Clock)
+case class JWTServiceLive(config: JwtConfig, javaClock: java.time.Clock)
     extends JWTService {
 
   private final val algorithm: Algorithm = {
@@ -71,14 +71,14 @@ case class JWTServiceLive(config: Config, javaClock: java.time.Clock)
 
 object JWTServiceLive {
 
-  val layer: ZLayer[Config, Nothing, JWTService] = ZLayer {
+  val layer: ZLayer[JwtConfig, Nothing, JWTService] = ZLayer {
     for {
-      config <- ZIO.service[Config]
+      config <- ZIO.service[JwtConfig]
       clock  <- Clock.javaClock
     } yield JWTServiceLive(config, clock)
   }
 
   val configuredLayer: ZLayer[Any, Throwable, JWTService] =
-    ConfigService.makeConfig[Config]("rock.the.jvm.jwt") >>> layer
+    ConfigService.makeConfig[JwtConfig]("rock.the.jvm.jwt") >>> layer
 
 }

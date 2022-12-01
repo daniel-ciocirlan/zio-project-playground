@@ -1,15 +1,14 @@
+import clients.backend.BackEndClientLive
 import com.raquo.airstream.core.EventStream
 import com.raquo.laminar.api.L._
-import endpoints.HealthEndpoints
+import domain.api.request.{LoginForm, RegisterAccountRequest}
 import io.frontroute._
 import layouts.Page
 import org.scalajs.dom
-import sttp.client3.{FetchBackend, Request, UriContext}
-import sttp.tapir.client.sttp.SttpClientInterpreter
+import zio.Unsafe
 
 import java.time.Instant
 import scala.concurrent.Future
-import scala.scalajs.concurrent.JSExecutionContext.Implicits.queue
 
 object Main {
 
@@ -32,8 +31,8 @@ object Main {
       p("Stuff about registering too")
     )
 
-    val backend         = FetchBackend()
-    val healthEndpoints = new HealthEndpoints {}
+    val runtime = zio.Runtime.default
+    val client  = BackEndClientLive.live
 
     // When we click a button, we will emit a Future that will fetch the current time
     val timeBus: EventBus[Future[Instant]] = new EventBus
@@ -43,15 +42,32 @@ object Main {
       ) // Flatten out our value from the Future
       .map(_.toString())
 
-    val timeRequest: Unit => Request[Instant, Any] = {
-      SttpClientInterpreter().toRequestThrowErrors(
-        healthEndpoints.timeEndpoint,
-        Some(uri"http://localhost:9000")
-      )
+    // quick hack - create user on load
+    def fetchTimeInit(): Future[Instant] = {
+      Unsafe.unsafe { implicit unsafe =>
+        runtime.unsafe.runToFuture(
+          for {
+            _    <- client
+                      .createAccount(RegisterAccountRequest("me", "pass123"))
+                      .ignore // silently fail if user already exists
+            _    <- client.fetchToken(
+                      LoginForm(username = "me", password = "pass123")
+                    )
+            time <- client.fetchTimeSecure()
+          } yield time
+        )
+      }
     }
 
-    def fetchTime(): Future[Instant] =
-      backend.send(timeRequest(())).map(_.body)
+    def fetchTime(): Future[Instant] = {
+      Unsafe.unsafe { implicit unsafe =>
+        runtime.unsafe.runToFuture(
+          for {
+            time <- client.fetchTimeSecure()
+          } yield time
+        )
+      }
+    }
 
     val timePage = Page(
       h1("The current time is"),
@@ -59,7 +75,7 @@ object Main {
         child.text <-- processedTime,
         onMountCallback { _ =>
           // Seed the initial time
-          timeBus.emit(fetchTime())
+          timeBus.emit(fetchTimeInit())
         }
       ),
       button("refresh", onClick.mapTo(fetchTime()) --> timeBus)
