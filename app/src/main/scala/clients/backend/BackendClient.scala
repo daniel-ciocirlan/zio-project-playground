@@ -23,7 +23,7 @@ trait BackEndClient {
 
 case class BackEndClientConfig(uri: Option[Uri])
 
-case class BackEndClientLive(
+case class BackendClientLive(
     backend: SttpBackend[Task, ZioStreams],
     config: BackEndClientConfig
 ) extends BackEndClient {
@@ -74,7 +74,7 @@ case class BackEndClientLive(
 
 }
 
-object BackEndClientLive {
+object BackendClientLive {
 
   val layer: ZLayer[
     BackEndClientConfig with SttpBackend[Task, ZioStreams],
@@ -84,7 +84,7 @@ object BackEndClientLive {
     for {
       sttp   <- ZIO.service[SttpBackend[Task, ZioStreams]]
       config <- ZIO.service[BackEndClientConfig]
-    } yield BackEndClientLive(sttp, config).asInstanceOf[BackEndClient]
+    } yield BackendClientLive(sttp, config).asInstanceOf[BackEndClient]
   }
 
   val jsProvided: ZLayer[Any, Nothing, BackEndClient] =
@@ -97,7 +97,7 @@ object BackEndClientLive {
       } >>>
       layer
 
-  lazy val jsManual: BackEndClientLive = BackEndClientLive(
+  lazy val jsManual: BackendClientLive = BackendClientLive(
     BearerBackend(FetchZioBackend()),
     BackEndClientConfig(
       uri = Some(uri"http://localhost:8080")
