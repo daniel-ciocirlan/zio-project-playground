@@ -13,4 +13,12 @@ object Page {
     )
   }
 
+  def apply(onMount: => Unit, elements: HtmlElement*): HtmlElement = {
+    div(
+      NavBar(),
+      elements,
+      onMountCallback(_ => onMount)
+    )
+  }
+
 }
