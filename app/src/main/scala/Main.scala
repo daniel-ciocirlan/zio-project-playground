@@ -1,45 +1,48 @@
 import com.raquo.laminar.api.L._
+import domain.api.response.{TokenResponse, User}
+import helpers.Storage
 import io.frontroute._
 import layouts.Page
 import org.scalajs.dom
-import pages.{
-  AboutPage,
-  CompaniesPage,
-  HomePage,
-  LoginPage,
-  SignUpPage,
-  TimePage
-}
+import pages.{AboutPage, CompaniesPage, HomePage, LoginPage, LogoutPage, SignUpPage, TimePage}
 
 object Main {
 
   def main(args: Array[String]): Unit = {
 
+    // TODO this would likely be more manageable as part of a "global app state"
+    val userState: Var[Option[User]] =
+      Var(Storage.get[TokenResponse]("token").map(_.user))
+
     val routedSite = div(
       pathEnd {
-        HomePage()
+        HomePage(userState)
       },
       path("companies") {
-        CompaniesPage()
+        CompaniesPage(userState)
       },
       path("about") {
-        AboutPage()
+        AboutPage(userState)
       },
       path("time") {
-        TimePage()
+        TimePage(userState)
       },
       pathPrefix("account") {
         div(
           path("login") {
-            LoginPage()
+            LoginPage(userState)
           },
           path("signup") {
-            SignUpPage()
+            SignUpPage(userState)
+          },
+          path("logout") {
+            LogoutPage(userState)
           }
         )
       },
       (noneMatched & extractUnmatchedPath) { unmatched =>
         Page(
+          userState,
           h1("Not Found"),
           div(
             span("Not found path:"),

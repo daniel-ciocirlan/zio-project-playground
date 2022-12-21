@@ -10,7 +10,7 @@ import zio.{Clock, Task, ZIO, ZLayer}
 import java.security.SecureRandom
 
 trait JWTService {
-  def createToken(userRecord: UserRecord): Task[String]
+  def createToken(userRecord: UserRecord): Task[(String, Long)]
   def verifyToken(token: String): Task[ValidatedUserToken]
 }
 
@@ -39,20 +39,21 @@ case class JWTServiceLive(config: JwtConfig, javaClock: java.time.Clock)
       .build(javaClock)
 
   // https://www.iana.org/assignments/jwt/jwt.xhtml
-  override def createToken(userRecord: UserRecord): Task[String] = {
+  override def createToken(userRecord: UserRecord): Task[(String, Long)] = {
     for {
-      now   <- Clock.instant
-      token <- ZIO.attempt {
-                 JWT
-                   .create()
-                   .withIssuer("RTJVM")
-                   .withIssuedAt(now)
-                   .withExpiresAt(now.plusSeconds(config.ttl))
-                   .withSubject(userRecord.id.toString)
-                   .withClaim("preferred_username", userRecord.userName)
-                   .sign(algorithm)
-               }
-    } yield token
+      now     <- Clock.instant
+      expires <- ZIO.succeed(now.plusSeconds(config.ttl))
+      token   <- ZIO.attempt {
+                   JWT
+                     .create()
+                     .withIssuer("RTJVM")
+                     .withIssuedAt(now)
+                     .withExpiresAt(expires)
+                     .withSubject(userRecord.id.toString)
+                     .withClaim("preferred_username", userRecord.userName)
+                     .sign(algorithm)
+                 }
+    } yield (token, expires.toEpochMilli)
 
   }
 
