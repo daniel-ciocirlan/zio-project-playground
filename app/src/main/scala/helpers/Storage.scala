@@ -16,7 +16,7 @@ object Storage {
   def get[D](key: String)(implicit reader: Reader[D]): Option[D] =
     Try(read[D](dom.window.localStorage.getItem(key))).toOption
 
-  def set(key: String, data: String): Unit                       =
+  def set(key: String, data: String): Unit =
     dom.window.localStorage.setItem(key, data)
 
   def set[D](key: String, data: D)(implicit writer: Writer[D]): Unit =

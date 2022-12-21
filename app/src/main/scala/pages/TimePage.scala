@@ -2,8 +2,6 @@ package pages
 
 import layouts.Page
 import com.raquo.laminar.api.L._
-import domain.api.request.{LoginForm, RegisterAccountRequest}
-import domain.api.response.User
 import helpers.ZJS._
 
 import java.time.Instant
@@ -17,8 +15,7 @@ object TimePage {
     effect.emitTo(backendBus)
   }
 
-  def apply(userState: Var[Option[User]]): HtmlElement = Page(
-    userState,
+  def apply(): HtmlElement = Page(
     h1("The current time is"),
     p(
       child.text <-- backendStream.keep[Instant].map(_.toString)

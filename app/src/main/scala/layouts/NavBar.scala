@@ -3,18 +3,19 @@ package layouts
 import com.raquo.laminar.api.L._
 import com.raquo.laminar.nodes.ReactiveHtmlElement
 import domain.api.response.User
-import helpers.Storage
 import org.scalajs.dom.html
+import state.AppState
 
 object NavBar {
 
-  val accountAction: User => ReactiveHtmlElement[html.Anchor] = (user: User) => a(
-    className := "nav-link",
-    href := "/account/logout",
-    "Log Out"
-  )
+  val accountAction: User => ReactiveHtmlElement[html.Anchor] = (_: User) =>
+    a(
+      className := "nav-link",
+      href      := "/account/logout",
+      "Log Out"
+    )
 
-  def apply(userState: Var[Option[User]]): HtmlElement = {
+  def apply(): HtmlElement = {
     nav(
       className  := "navbar navbar-expand-lg bg-light",
       role       := "navigation",
@@ -74,8 +75,12 @@ object NavBar {
               className := "nav-item",
               a(
                 className := "nav-link",
-                href      <-- userState.signal.map(opt => if (opt.isDefined) "/account/logout" else "/account/login"),
-                child.text <-- userState.signal.map(opt => if (opt.isDefined) "Log Out" else "Log In")
+                href <-- AppState.userState.signal.map(opt =>
+                  if (opt.isDefined) "/account/logout" else "/account/login"
+                ),
+                child.text <-- AppState.userState.signal.map(opt =>
+                  if (opt.isDefined) "Log Out" else "Log In"
+                )
               )
             )
           )
