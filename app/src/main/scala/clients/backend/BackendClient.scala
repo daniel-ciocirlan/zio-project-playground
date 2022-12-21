@@ -3,6 +3,8 @@ package clients.backend
 import domain.api.request.{LoginForm, RegisterAccountRequest}
 import domain.api.response.{TokenResponse, User}
 import endpoints.{HealthEndpoints, UserEndpoints}
+import helpers.Storage
+import state.AppState
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3._
 import sttp.client3.impl.zio.FetchZioBackend
@@ -23,6 +25,8 @@ trait BackEndClient {
 
 case class BackEndClientConfig(uri: Option[Uri])
 
+case class TokenExpiredError(msg: String) extends Exception(msg)
+
 case class BackendClientLive(
     backend: SttpBackend[Task, ZioStreams],
     config: BackEndClientConfig
@@ -32,6 +36,26 @@ case class BackendClientLive(
   val user   = new UserEndpoints {}
 
   val interpreter: SttpClientInterpreter = SttpClientInterpreter()
+
+  private def tokenOrFail: Task[String] = {
+    for {
+      now       <- Clock.instant
+      userState <-
+        ZIO
+          .fromOption(AppState.userState.now())
+          .orElseFail(
+            TokenExpiredError("User credentials are missing. Please log in.")
+          )
+      _         <-
+        ZIO
+          .fail(
+            TokenExpiredError(
+              "User credentials have expired. Please log in again."
+            )
+          )
+          .when(now.toEpochMilli > userState.expires)
+    } yield userState.accessToken
+  }
 
   override def createAccount(request: RegisterAccountRequest): Task[User] = {
 
@@ -58,7 +82,7 @@ case class BackendClientLive(
       )
 
     backend
-      .send(_request(request).header("X-FETCH-TOKEN", "true"))
+      .send(_request(request))
       .map(_.body)
       .absolve
 
@@ -84,8 +108,11 @@ case class BackendClientLive(
         config.uri
       )
 
-    // We send an empty string here, because we're going to rely on a DelegateSttpBackend
-    backend.send(_request("")(())).map(_.body)
+    for {
+      token    <- tokenOrFail
+      response <- backend.send(_request(token)(())).map(_.body)
+    } yield response
+
   }
 
 }
@@ -104,8 +131,7 @@ object BackendClientLive {
   }
 
   val jsProvided: ZLayer[Any, Nothing, BackEndClient] =
-    ZLayer.succeed(FetchZioBackend()) >>>
-      BearerBackend.layer >+>
+    ZLayer.succeed(FetchZioBackend()) >+>
       ZLayer.succeed {
         BackEndClientConfig(
           uri = Some(uri"http://localhost:8080")
@@ -114,7 +140,7 @@ object BackendClientLive {
       layer
 
   lazy val jsManual: BackendClientLive = BackendClientLive(
-    BearerBackend(FetchZioBackend()),
+    FetchZioBackend(),
     BackEndClientConfig(
       uri = Some(uri"http://localhost:8080")
     )
