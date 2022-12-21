@@ -20,7 +20,7 @@ object JWTServiceSpec extends ZIOSpecDefault {
     test("generate / validate token") {
       for {
         jwt      <- JWTService(_.createToken(someUser))
-        verified <- JWTService(_.verifyToken(jwt))
+        verified <- JWTService(_.verifyToken(jwt._1))
       } yield assertTrue(
         verified.userId == someUser.id,
         verified.userName == someUser.userName
@@ -29,11 +29,11 @@ object JWTServiceSpec extends ZIOSpecDefault {
     test("expires token") {
       for {
         jwt   <- JWTService(_.createToken(someUser))
-        _     <- JWTService(_.verifyToken(jwt))
+        _     <- JWTService(_.verifyToken(jwt._1))
         _     <- TestClock.adjust((tokenTtl - 1).seconds)
-        _     <- JWTService(_.verifyToken(jwt))
+        _     <- JWTService(_.verifyToken(jwt._1))
         _     <- TestClock.adjust(2.seconds)
-        error <- JWTService(_.verifyToken(jwt)).flip
+        error <- JWTService(_.verifyToken(jwt._1)).flip
       } yield assertTrue(
         error.isInstanceOf[TokenExpiredException]
       )

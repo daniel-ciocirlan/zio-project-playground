@@ -2,11 +2,11 @@ package pages
 
 import com.raquo.laminar.api.L._
 import domain.api.request.LoginForm
-import domain.api.response.User
-import helpers.{Storage, ZJS}
+import helpers.ZJS
 import helpers.ZJS._
 import io.frontroute.BrowserNavigation
 import layouts.Page
+import state.AppState
 import zio.ZIO
 
 object LoginPage {
@@ -46,38 +46,34 @@ object LoginPage {
       state.copy(password = pass, showErrors = false, upstreamError = None)
     )
 
-  val submitter: Var[Option[User]] => Observer[FormState] = {
-    (userState: Var[Option[User]]) =>
-      Observer[FormState] { state =>
-        if (state.hasErrors) {
-          stateVar.update(_.copy(showErrors = true))
-        } else {
-          (
-            for {
-              token <-
-                ZJS.client(_.fetchToken(LoginForm(state.user, state.password)))
-            } yield {
-              Storage.set("raw-token", token.accessToken)
-              Storage.set("token", token)
-              userState.set(Option(token.user))
-              BrowserNavigation.replaceState("/")
-            }
-          ).tapError { case e =>
-            ZIO.succeed(
-              stateVar.update(
-                _.copy(
-                  showErrors = true,
-                  upstreamError = Option(e.getMessage)
-                )
+  val submitter: Observer[FormState] = {
+    Observer[FormState] { state =>
+      if (state.hasErrors) {
+        stateVar.update(_.copy(showErrors = true))
+      } else {
+        (
+          for {
+            token <-
+              ZJS.client(_.fetchToken(LoginForm(state.user, state.password)))
+          } yield {
+            AppState.setUserState(token)
+            BrowserNavigation.replaceState("/")
+          }
+        ).tapError { case e =>
+          ZIO.succeed(
+            stateVar.update(
+              _.copy(
+                showErrors = true,
+                upstreamError = Option(e.getMessage)
               )
             )
-          }.runJs
-        }
+          )
+        }.runJs
       }
+    }
   }
 
-  def apply(userState: Var[Option[User]]): HtmlElement = Page(
-    userState,
+  def apply(): HtmlElement = Page(
     div(
       className := "container my-lg-5 my-md-3 my-sm-1",
       h3(
@@ -93,7 +89,7 @@ object LoginPage {
       ),
       form(
         onSubmit.preventDefault
-          .mapTo(stateVar.now()) --> submitter(userState),
+          .mapTo(stateVar.now()) --> submitter,
         div(
           className := "form-group",
           label(forId        := "userid", "Username"),
