@@ -3,7 +3,6 @@ package clients.backend
 import domain.api.request.{LoginForm, RegisterAccountRequest}
 import domain.api.response.{TokenResponse, User}
 import endpoints.{HealthEndpoints, UserEndpoints}
-import helpers.Storage
 import state.AppState
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3._
