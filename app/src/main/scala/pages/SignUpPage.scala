@@ -67,7 +67,7 @@ object SignUpPage {
         } else {
           stateVar.update(_.copy(showErrors = false))
           (for {
-            _  <- ZJS
+            _     <- ZJS
                        .client(
                          _.createAccount(
                            RegisterAccountRequest(
@@ -119,7 +119,7 @@ object SignUpPage {
           onSubmit.preventDefault
             .mapTo(stateVar.now()) --> submitter(userState),
           div(
-            className   := "form-group",
+            className := "form-group",
             label(forId        := "userid", "Username"),
             input(
               className        := "form-control",
@@ -139,7 +139,7 @@ object SignUpPage {
             )
           ),
           div(
-            className   := "form-group",
+            className := "form-group",
             label(forId        := "password1", "Password"),
             input(
               className        := "form-control",
@@ -159,7 +159,7 @@ object SignUpPage {
             )
           ),
           div(
-            className   := "form-group",
+            className := "form-group",
             label(forId        := "password2", "Password Again"),
             input(
               className        := "form-control",
@@ -178,7 +178,18 @@ object SignUpPage {
               "It should be the same as above"
             )
           ),
-          button(`type` := "submit", className := "btn btn-primary", "Submit")
+          div(
+            button(
+              `type`    := "submit",
+              className := "btn btn-primary",
+              "Submit"
+            ),
+            a(
+              className := "btn btn-outline-info m-2",
+              href      := "/account/login",
+              "Log In"
+            )
+          )
         )
       )
 

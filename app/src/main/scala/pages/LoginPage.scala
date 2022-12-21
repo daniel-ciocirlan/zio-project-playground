@@ -62,7 +62,7 @@ object LoginPage {
               userState.set(Option(token.user))
               BrowserNavigation.replaceState("/")
             }
-          ).tapError {case e =>
+          ).tapError { case e =>
             ZIO.succeed(
               stateVar.update(
                 _.copy(
@@ -78,11 +78,65 @@ object LoginPage {
 
   def apply(userState: Var[Option[User]]): HtmlElement = Page(
     userState,
-    h1("Login goes here"),
-    p("Or sign up:"),
-    a(
-      href := "/account/signup",
-      "here"
+    div(
+      className := "container my-lg-5 my-md-3 my-sm-1",
+      h3(
+        className := "pt-5",
+        "Log In"
+      ),
+      div(
+        className := "alert alert-danger my-3",
+        hidden <-- stateVar.signal.map(!_.showErrors),
+        child.text <-- stateVar.signal.map(
+          _.errorMessage.getOrElse("Something has gone wrong")
+        )
+      ),
+      form(
+        onSubmit.preventDefault
+          .mapTo(stateVar.now()) --> submitter(userState),
+        div(
+          className := "form-group",
+          label(forId        := "userid", "Username"),
+          input(
+            className        := "form-control",
+            `type`           := "text",
+            idAttr           := "userid",
+            aria.describedBy := "useridHelp",
+            placeholder      := "Your user id",
+            controlled(
+              value <-- stateVar.signal.map(_.user),
+              onInput.mapToValue --> userWriter
+            )
+          )
+        ),
+        div(
+          className := "form-group",
+          label(forId        := "password", "Password"),
+          input(
+            className        := "form-control",
+            `type`           := "password",
+            idAttr           := "password",
+            aria.describedBy := "password1Help",
+            placeholder      := "Your password",
+            controlled(
+              value <-- stateVar.signal.map(_.password),
+              onInput.mapToValue --> passwordWriter
+            )
+          )
+        ),
+        div(
+          button(
+            `type`    := "submit",
+            className := "btn btn-primary m-2",
+            "Submit"
+          ),
+          a(
+            className := "btn btn-outline-info m-2",
+            href      := "/account/signup",
+            "Register"
+          )
+        )
+      )
     )
   )
 
