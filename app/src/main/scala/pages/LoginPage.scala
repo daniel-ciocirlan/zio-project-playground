@@ -57,6 +57,7 @@ object LoginPage {
               ZJS.client(_.fetchToken(LoginForm(state.user, state.password)))
           } yield {
             AppState.setUserState(token)
+            stateVar.set(FormState())
             BrowserNavigation.replaceState("/")
           }
         ).tapError { case e =>

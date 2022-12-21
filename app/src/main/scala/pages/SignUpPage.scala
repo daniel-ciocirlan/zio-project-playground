@@ -83,6 +83,7 @@ object SignUpPage {
             )
         } yield {
           AppState.setUserState(token)
+          stateVar.set(FormState())
           BrowserNavigation.replaceState("/")
         }).tapError { case e =>
           ZIO.succeed(
