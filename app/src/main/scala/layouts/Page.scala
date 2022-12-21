@@ -1,23 +1,16 @@
 package layouts
 
 import com.raquo.laminar.api.L._
+import domain.api.response.User
 
 trait Page {}
 
 object Page {
 
-  def apply(elements: HtmlElement*): HtmlElement = {
+  def apply(userState: Var[Option[User]], elements: HtmlElement*): HtmlElement = {
     div(
-      NavBar(),
+      NavBar(userState),
       elements
-    )
-  }
-
-  def apply(onMount: => Unit, elements: HtmlElement*): HtmlElement = {
-    div(
-      NavBar(),
-      elements,
-      onMountCallback(_ => onMount)
     )
   }
 

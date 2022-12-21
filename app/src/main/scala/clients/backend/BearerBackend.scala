@@ -11,7 +11,8 @@ case class BearerBackend(
     delegate: SttpBackend[Task, ZioStreams]
 ) extends DelegateSttpBackend[Task, ZioStreams](delegate = delegate) {
 
-  val tokenKey: String = "token"
+  // TODO rework this
+  val tokenKey: String = "raw-token"
 
   override def send[T, R >: ZioStreams with capabilities.Effect[Task]](
       request: Request[T, R]

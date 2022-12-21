@@ -35,28 +35,44 @@ case class BackendClientLive(
 
   override def createAccount(request: RegisterAccountRequest): Task[User] = {
 
-    val _request: RegisterAccountRequest => Request[User, Any] =
-      interpreter.toRequestThrowErrors(user.registerEndpoint, config.uri)
+    val _request
+        : RegisterAccountRequest => Request[Either[Throwable, User], Any] =
+      interpreter.toRequestThrowDecodeFailures(
+        user.registerEndpoint,
+        config.uri
+      )
 
-    backend.send(_request(request)).map(_.body)
+    backend
+      .send(_request(request))
+      .map(_.body)
+      .absolve
 
   }
 
   override def fetchToken(request: LoginForm): Task[TokenResponse] = {
 
-    val _request: LoginForm => Request[TokenResponse, Any] =
-      interpreter.toRequestThrowErrors(user.generateTokenEndpoint, config.uri)
+    val _request: LoginForm => Request[Either[Throwable, TokenResponse], Any] =
+      interpreter.toRequestThrowDecodeFailures(
+        user.generateTokenEndpoint,
+        config.uri
+      )
 
-    backend.send(_request(request).header("X-FETCH-TOKEN", "true")).map(_.body)
+    backend
+      .send(_request(request).header("X-FETCH-TOKEN", "true"))
+      .map(_.body)
+      .absolve
 
   }
 
   override def fetchTime(): Task[Instant] = {
 
-    val _request: Unit => Request[Instant, Any] =
-      interpreter.toRequestThrowErrors(health.timeEndpoint, config.uri)
+    val _request: Unit => Request[Either[Throwable, Instant], Any] =
+      interpreter.toRequestThrowDecodeFailures(health.timeEndpoint, config.uri)
 
-    backend.send(_request(())).map(_.body)
+    backend
+      .send(_request(()))
+      .map(_.body)
+      .absolve
 
   }
 

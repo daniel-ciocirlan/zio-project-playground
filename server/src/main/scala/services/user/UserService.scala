@@ -198,7 +198,13 @@ case class UserServiceLive(
       tokenOpt     <- jwtService
                         .createToken(existingUser)
                         .when(verified)
-    } yield tokenOpt.map(t => TokenResponse(accessToken = t))
+    } yield tokenOpt.map { t =>
+      TokenResponse(
+        accessToken = t._1,
+        user = User(userName = existingUser.userName),
+        expires = t._2
+      )
+    }
 
 }
 
