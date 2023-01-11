@@ -2,11 +2,11 @@ import sbt._
 
 object Dependencies {
 
-  val zioVersion        = "2.0.4"
-  val tapirVersion      = "1.2.3"
-  val zioLoggingVersion = "2.1.5"
-  val zioConfigVersion  = "3.0.2"
-  val sttpVersion       = "3.8.3"
+  val zioVersion        = "2.0.5"
+  val tapirVersion      = "1.2.5"
+  val zioLoggingVersion = "2.1.7"
+  val zioConfigVersion  = "3.0.7"
+  val sttpVersion       = "3.8.8"
 
   val server: Seq[ModuleID] = Seq(
 //  "dev.zio"                     %% "zio"                     % "2.0.0",
