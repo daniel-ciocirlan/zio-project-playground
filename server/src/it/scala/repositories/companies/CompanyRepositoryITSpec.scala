@@ -11,30 +11,37 @@ import java.sql.SQLException
 
 object CompanyRepositoryITSpec extends ZIOSpecDefault {
 
-  val someCompany: CompanyRecord =
-    CompanyRecord(
-      id = -1,
-      slug = "rockthejvm",
-      name = "Rock the JVM",
-      url = "https://rockthejvm.com"
+  def rndStr(len: Int = 5): String =
+    scala.util.Random.alphanumeric.take(len).mkString
+
+  def genCompany: Iterator[CompanyRecord] = LazyList
+    .continually(
+      CompanyRecord(
+        id = -1,
+        slug = rndStr(),
+        name = rndStr(),
+        url = rndStr()
+      )
     )
+    .iterator
 
   val tests = suite("CompanyRepository")(
     test("create") {
       for {
-        _   <- ZIO.serviceWithZIO[CompanyRepository](_.create(someCompany))
-        err <- ZIO.serviceWithZIO[CompanyRepository](_.create(someCompany)).flip
+        someCompany <-
+          ZIO.serviceWithZIO[CompanyRepository](_.create(genCompany.next()))
+        err         <- ZIO.serviceWithZIO[CompanyRepository](_.create(someCompany)).flip
       } yield assertTrue(err.isInstanceOf[SQLException])
     },
     test("getBy") {
       for {
         created       <- ZIO.serviceWithZIO[CompanyRepository](
-                           _.create(someCompany.copy(slug = "rtjvm"))
+                           _.create(genCompany.next())
                          )
         fetchedById   <-
           ZIO.serviceWithZIO[CompanyRepository](_.getById(created.id))
         fetchedBySlug <-
-          ZIO.serviceWithZIO[CompanyRepository](_.getBySlug("rtjvm"))
+          ZIO.serviceWithZIO[CompanyRepository](_.getBySlug(created.slug))
       } yield assertTrue(
         fetchedById.contains(created),
         fetchedBySlug.contains(created)
@@ -43,7 +50,7 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
     test("updated") {
       for {
         created     <- ZIO.serviceWithZIO[CompanyRepository](
-                         _.create(someCompany.copy(slug = "rjvm"))
+                         _.create(genCompany.next())
                        )
         updated     <-
           ZIO.serviceWithZIO[CompanyRepository](
@@ -64,7 +71,7 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
     test("delete") {
       for {
         created     <- ZIO.serviceWithZIO[CompanyRepository](
-                         _.create(someCompany.copy(slug = "rtjayveeem"))
+                         _.create(genCompany.next())
                        )
         _           <- ZIO.serviceWithZIO[CompanyRepository](_.delete(created.id))
         fetchedById <-
