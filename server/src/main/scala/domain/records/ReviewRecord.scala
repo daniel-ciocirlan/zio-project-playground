@@ -1,5 +1,7 @@
 package domain.records
 
+import domain.api.response.Review
+
 import java.time.Instant
 
 case class ReviewRecord(
@@ -15,3 +17,20 @@ case class ReviewRecord(
     created: Instant,
     updated: Instant
 )
+
+object ReviewRecord {
+  implicit val conversion: ReviewRecord => Review =
+    rec =>
+      Review(
+        id = rec.id,
+        companyId = rec.companyId,
+        management = rec.management,
+        culture = rec.culture,
+        salary = rec.salary,
+        benefits = rec.benefits,
+        wouldRecommend = rec.wouldRecommend,
+        review = rec.review,
+        created = rec.created,
+        updated = rec.updated
+      )
+}

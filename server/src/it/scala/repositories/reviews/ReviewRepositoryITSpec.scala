@@ -134,11 +134,7 @@ object ReviewRepositoryITSpec extends ZIOSpecDefault {
       _ <- ZIO
              .serviceWithZIO[CompanyRepository](
                _.create(
-                 CompanyRepositoryITSpec.someCompany
-                   .copy(
-                     slug = scala.util.Random.alphanumeric.take(5).mkString,
-                     url = scala.util.Random.alphanumeric.take(5).mkString
-                   )
+                 CompanyRepositoryITSpec.genCompany.next()
                )
              )
              .repeatN(4)
