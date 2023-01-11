@@ -22,14 +22,21 @@ import java.time.Instant
 
 object ReviewRepositoryITSpec extends ZIOSpecDefault {
 
-  val someReview: ReviewRecord =
+  val someReview: ReviewRecord = {
     ReviewRecord(
       id = -1,
       companyId = 1,
-      userId = 1,
-      txt = "This is the best place ever!",
-      date = Instant.now()
+      submittedBy = 1,
+      management = 4,
+      culture = 5,
+      salary = 3,
+      benefits = 0,
+      wouldRecommend = 5,
+      review = "Best place ever",
+      created = Instant.now(),
+      updated = Instant.now()
     )
+  }
 
   private val _repo: ZIO.ServiceWithZIOPartiallyApplied[ReviewRepository] =
     ZIO.serviceWithZIO[ReviewRepository]
@@ -55,14 +62,14 @@ object ReviewRepositoryITSpec extends ZIOSpecDefault {
     },
     test("create fails for bad user fk") {
       for {
-        err <- _repo(_.create(someReview.copy(userId = 10))).flip
+        err <- _repo(_.create(someReview.copy(submittedBy = 10))).flip
       } yield assertTrue(err.isInstanceOf[SQLException])
     },
     test("update") {
       for {
         rec     <- _create
-        updated <- _repo(_.update(rec.id, "Meh."))
-      } yield assertTrue(updated.txt == "Meh.")
+        updated <- _repo(_.update(rec.id, rec => rec.copy(review = "Meh.")))
+      } yield assertTrue(updated.review == "Meh.")
     },
     test("delete") {
       for {
@@ -80,21 +87,43 @@ object ReviewRepositoryITSpec extends ZIOSpecDefault {
     test("getReviewsByUser") {
       for {
         _    <- _create.repeatN(4) // 5 times total
-        _    <- _repo(_.create(someReview.copy(userId = 2))).repeatN(4)
-        recs <- _repo(_.getReviewsByUser(1))
+        _    <- _repo(_.create(someReview.copy(submittedBy = 2))).repeatN(4)
+        recs <- _repo(_.getByUserId(1))
       } yield assertTrue(
         recs.length == 5,
-        recs.count(_.userId == 1) == 5
+        recs.count(_.submittedBy == 1) == 5
       )
     },
     test("getReviewsByCompany") {
       for {
         _    <- _create.repeatN(4)
         _    <- _repo(_.create(someReview.copy(companyId = 2))).repeatN(4)
-        recs <- _repo(_.getReviewsByCompany(1))
+        recs <- _repo(_.getByCompanyId(1))
       } yield assertTrue(
         recs.length == 5,
         recs.count(_.companyId == 1) == 5
+      )
+    },
+    test("cascade delete company fk") {
+      for {
+        _     <- _create.repeatN(4)
+        recs  <- _repo(_.getByCompanyId(1))
+        _     <- ZIO.serviceWithZIO[CompanyRepository](_.delete(1))
+        recs2 <- _repo(_.getByCompanyId(1))
+      } yield assertTrue(
+        recs.length == 5,
+        recs2.length == 0
+      )
+    },
+    test("cascade delete user fk") {
+      for {
+        _     <- _create.repeatN(4)
+        recs  <- _repo(_.getByCompanyId(1))
+        _     <- ZIO.serviceWithZIO[UserRepository](_.delete(1))
+        recs2 <- _repo(_.getByUserId(1))
+      } yield assertTrue(
+        recs.length == 5,
+        recs2.length == 0
       )
     }
   ) @@ TestAspect.before {
@@ -106,7 +135,10 @@ object ReviewRepositoryITSpec extends ZIOSpecDefault {
              .serviceWithZIO[CompanyRepository](
                _.create(
                  CompanyRepositoryITSpec.someCompany
-                   .copy(slug = scala.util.Random.alphanumeric.take(5).mkString)
+                   .copy(
+                     slug = scala.util.Random.alphanumeric.take(5).mkString,
+                     url = scala.util.Random.alphanumeric.take(5).mkString
+                   )
                )
              )
              .repeatN(4)
