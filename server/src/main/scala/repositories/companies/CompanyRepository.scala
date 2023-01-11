@@ -7,9 +7,9 @@ import zio.{Task, ZIO, ZLayer}
 
 trait CompanyRepository {
   def create(record: CompanyRecord): Task[CompanyRecord]
-  def update(id: Int, op: CompanyRecord => CompanyRecord): Task[CompanyRecord]
-  def delete(id: Int): Task[CompanyRecord]
-  def getById(id: Int): Task[Option[CompanyRecord]]
+  def update(id: Long, op: CompanyRecord => CompanyRecord): Task[CompanyRecord]
+  def delete(id: Long): Task[CompanyRecord]
+  def getById(id: Long): Task[Option[CompanyRecord]]
   def getBySlug(slug: String): Task[Option[CompanyRecord]]
 }
 
@@ -28,7 +28,7 @@ case class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase])
     run(query[CompanyRecord].insertValue(lift(record)).returning(r => r))
 
   override def update(
-      id: Int,
+      id: Long,
       op: CompanyRecord => CompanyRecord
   ): Task[CompanyRecord] = {
     for {
@@ -45,10 +45,10 @@ case class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase])
     } yield updated
   }
 
-  override def delete(id: Int): Task[CompanyRecord] =
+  override def delete(id: Long): Task[CompanyRecord] =
     run(query[CompanyRecord].filter(_.id == lift(id)).delete.returning(r => r))
 
-  override def getById(id: Int): Task[Option[CompanyRecord]] =
+  override def getById(id: Long): Task[Option[CompanyRecord]] =
     run(query[CompanyRecord].filter(_.id == lift(id))).map(_.headOption)
 
   override def getBySlug(slug: String): Task[Option[CompanyRecord]] =

@@ -7,6 +7,6 @@ package object jwt {
       ttl: Int
   )
 
-  case class ValidatedUserToken(userId: Int, userName: String)
+  case class ValidatedUserToken(userId: Long, userName: String)
 
 }

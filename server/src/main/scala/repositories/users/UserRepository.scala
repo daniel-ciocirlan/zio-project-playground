@@ -7,10 +7,10 @@ import zio._
 
 trait UserRepository {
   def create(record: UserRecord): Task[UserRecord]
-  def update(id: Int, op: UserRecord => UserRecord): Task[UserRecord]
-  def getById(id: Int): Task[Option[UserRecord]]
+  def update(id: Long, op: UserRecord => UserRecord): Task[UserRecord]
+  def getById(id: Long): Task[Option[UserRecord]]
   def getByUserName(userName: String): Task[Option[UserRecord]]
-  def delete(id: Int): Task[UserRecord]
+  def delete(id: Long): Task[UserRecord]
 }
 
 case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
@@ -31,7 +31,7 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
     run(query[UserRecord].insertValue(lift(record)).returning(r => r))
 
   override def update(
-      id: Int,
+      id: Long,
       op: UserRecord => UserRecord
   ): Task[UserRecord] = {
     for {
@@ -48,10 +48,10 @@ case class UserRepositoryLive(quill: Quill.Postgres[SnakeCase])
     } yield updated
   }
 
-  override def getById(id: Int): Task[Option[UserRecord]] =
+  override def getById(id: Long): Task[Option[UserRecord]] =
     run(query[UserRecord].filter(_.id == lift(id))).map(_.headOption)
 
-  override def delete(id: Int): Task[UserRecord] =
+  override def delete(id: Long): Task[UserRecord] =
     run(query[UserRecord].filter(_.id == lift(id)).delete.returning(r => r))
 
   override def getByUserName(username: String): Task[Option[UserRecord]] =

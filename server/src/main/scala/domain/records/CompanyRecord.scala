@@ -1,11 +1,8 @@
 package domain.records
 
-import io.getquill.JsonValue
-
 case class CompanyRecord(
-    id: Int,
+    id: Long,
     slug: String,
     name: String,
-    hq: Option[JsonValue[LocationRecord]],
-    offices: JsonValue[Seq[LocationRecord]]
+    url: String
 )
