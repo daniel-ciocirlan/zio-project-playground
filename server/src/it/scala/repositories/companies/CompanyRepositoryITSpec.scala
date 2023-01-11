@@ -1,7 +1,6 @@
 package repositories.companies
 
-import domain.records.{CompanyRecord, LocationRecord}
-import io.getquill.JsonValue
+import domain.records.CompanyRecord
 import io.github.scottweaver.zio.testcontainers.postgres.ZPostgreSQLContainer
 import repositories.Repository
 import services.flyway.{FlywayService, FlywayServiceLive}
@@ -17,8 +16,7 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
       id = -1,
       slug = "rockthejvm",
       name = "Rock the JVM",
-      hq = Option(JsonValue(LocationRecord("RO", "Bucharest"))),
-      offices = JsonValue(Seq.empty)
+      url = "https://rockthejvm.com"
     )
 
   val tests = suite("CompanyRepository")(
@@ -52,10 +50,8 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
             _.update(
               created.id,
               rec =>
-                rec.copy(offices =
-                  JsonValue(
-                    rec.offices.value :+ LocationRecord("US", "Buffalo")
-                  )
+                rec.copy(
+                  url = "https://blog.rockthejvm.com"
                 )
             )
           )

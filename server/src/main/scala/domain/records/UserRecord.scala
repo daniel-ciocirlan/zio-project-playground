@@ -3,7 +3,7 @@ package domain.records
 import domain.api.response.User
 
 case class UserRecord(
-    id: Int,
+    id: Long,
     userName: String,
     pwHash: String
 )
