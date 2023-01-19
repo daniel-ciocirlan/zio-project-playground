@@ -3,7 +3,7 @@ package controllers
 import domain.api.request.CreateCompanyRequest
 import domain.api.response.Company
 import endpoints.CompanyEndpoints
-import services.companies.CompanyService
+import services.company.CompanyService
 import services.jwt.{JWTService, ValidatedUserToken}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.ServerEndpoint.Full
