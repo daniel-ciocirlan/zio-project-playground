@@ -1,4 +1,4 @@
-package services.companies
+package services.company
 
 import domain.api.response.Company
 import zio._
@@ -37,7 +37,7 @@ case class CompanyServiceLive(companyRepository: CompanyRepository)
 
 object CompanyServiceLive {
 
-  val layer: ZLayer[CompanyRepository, Nothing, CompanyServiceLive] = ZLayer {
+  val layer: ZLayer[CompanyRepository, Nothing, CompanyService] = ZLayer {
     for {
       repo <- ZIO.service[CompanyRepository]
     } yield CompanyServiceLive(repo)

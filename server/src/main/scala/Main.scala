@@ -8,7 +8,7 @@ import org.flywaydb.core.api.FlywayException
 import repositories.Repository
 import repositories.companies.CompanyRepositoryLive
 import repositories.users.UserRepositoryLive
-import services.companies.{CompanyService, CompanyServiceLive}
+import services.company.{CompanyService, CompanyServiceLive}
 import services.flyway.{FlywayService, FlywayServiceLive}
 import services.jwt.{JWTService, JWTServiceLive}
 import services.user.{UserService, UserServiceLive}

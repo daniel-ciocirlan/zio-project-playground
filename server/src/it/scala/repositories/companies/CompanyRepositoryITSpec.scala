@@ -33,6 +33,17 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
         err         <- ZIO.serviceWithZIO[CompanyRepository](_.create(someCompany)).flip
       } yield assertTrue(err.isInstanceOf[SQLException])
     },
+    test("get all") {
+      for {
+        _     <-
+          ZIO.foreachDiscard(1 to 10) { _ =>
+            ZIO.serviceWithZIO[CompanyRepository](_.create(genCompany.next()))
+          }
+        fetch <- ZIO.serviceWithZIO[CompanyRepository](_.get)
+      } yield assertTrue(
+        fetch.length == 10
+      )
+    },
     test("getBy") {
       for {
         created       <- ZIO.serviceWithZIO[CompanyRepository](
@@ -78,7 +89,7 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
           ZIO.serviceWithZIO[CompanyRepository](_.getById(created.id))
       } yield assertTrue(fetchedById.isEmpty)
     }
-  ) @@ TestAspect.beforeAll(
+  ) @@ TestAspect.before(
     ZIO
       .serviceWithZIO[FlywayService](_.runMigrations)
   )
@@ -86,7 +97,7 @@ object CompanyRepositoryITSpec extends ZIOSpecDefault {
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("CompanyRepositoryITSpec")(
       tests
-    ).provideSomeShared[Scope](
+    ).provideSome[Scope](
       Repository.quillPostgresLayer,
       CompanyRepositoryLive.layer,
       FlywayServiceLive.testContainerLayer,
