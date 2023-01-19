@@ -1,38 +1,62 @@
 package controllers
 
+import domain.api.request.CreateCompanyRequest
+import domain.api.response.Company
 import endpoints.CompanyEndpoints
-import zio.ZIO
+import services.companies.CompanyService
+import services.jwt.{JWTService, ValidatedUserToken}
+import sttp.tapir.server.ServerEndpoint
+import sttp.tapir.server.ServerEndpoint.Full
+import zio.{Task, ZIO}
 
 object CompanyController {
-  def makeZIO: ZIO[Any, Nothing, CompanyController] =
-    ZIO.succeed(CompanyController())
+  def makeZIO: ZIO[JWTService with CompanyService, Nothing, CompanyController] =
+    for {
+      companyService <- ZIO.service[CompanyService]
+      jwtService     <- ZIO.service[JWTService]
+    } yield CompanyController(companyService, jwtService)
 }
 
-case class CompanyController() extends BaseController with CompanyEndpoints {
+case class CompanyController(
+    companyService: CompanyService,
+    jwtService: JWTService
+) extends BaseController
+    with CompanyEndpoints {
 
-  // Will probably want to bring in the concept of an admin user...
-
-  val create =
+  val create: Full[
+    String,
+    ValidatedUserToken,
+    CreateCompanyRequest,
+    Throwable,
+    Company,
+    Any,
+    Task
+  ] =
     createEndpoint
-      .serverLogic(???)
+      .serverSecurityLogic[ValidatedUserToken, Task](token =>
+        jwtService.verifyToken(token).either
+      )
+      .serverLogic(_ => req => companyService.create(req.name, req.url).either)
 
-  val update =
-    updateEndpoint
-      .serverLogic(???)
-
-  val delete =
-    deleteEndpoint
-      .serverLogic(???)
-
-  // Should be paged
-  // Probably default to alphabetical, but add by rating.
-  // Maybe other sort / search filters
-  val get =
+  val get: Full[Unit, Unit, Unit, Throwable, Seq[Company], Any, Task] =
     getAllEndpoint
-      .serverLogic(???)
+      .serverLogic[Task](_ => companyService.getAll.either)
 
   val getById =
     getByIdEndpoint
-      .serverLogic(???)
+      .serverLogic[Task] { strId =>
+        ZIO
+          .attempt(strId.toLong)
+          .flatMap(longId => companyService.getById(longId))
+          .catchSome { case _: NumberFormatException =>
+            companyService.getBySlug(strId)
+          }
+          .either
+      }
 
+  override val routes: List[ServerEndpoint[Any, Task]] = List(
+    create,
+    get,
+    getById
+  )
 }
