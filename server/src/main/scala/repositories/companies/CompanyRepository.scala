@@ -11,6 +11,7 @@ trait CompanyRepository {
   def delete(id: Long): Task[CompanyRecord]
   def getById(id: Long): Task[Option[CompanyRecord]]
   def getBySlug(slug: String): Task[Option[CompanyRecord]]
+  def get: Task[Seq[CompanyRecord]]
 }
 
 case class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase])
@@ -53,6 +54,9 @@ case class CompanyRepositoryLive(quill: Quill.Postgres[SnakeCase])
 
   override def getBySlug(slug: String): Task[Option[CompanyRecord]] =
     run(query[CompanyRecord].filter(_.slug == lift(slug))).map(_.headOption)
+
+  override def get: Task[Seq[CompanyRecord]] =
+    run(query[CompanyRecord])
 
 }
 

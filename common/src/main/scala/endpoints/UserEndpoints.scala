@@ -10,7 +10,7 @@ trait UserEndpoints extends BaseEndpoint {
 
   val registerEndpoint: Endpoint[Unit, RegisterAccountRequest, Throwable, User, Any] =
     baseEndpoint
-      .tag("users")
+      .tag("Users")
       .name("register")
       .description("Register a user account with username and password")
       .in("users")
@@ -21,7 +21,7 @@ trait UserEndpoints extends BaseEndpoint {
   val updatePasswordEndpoint
       : Endpoint[String, UpdatePasswordRequest, Throwable, User, Any] =
     secureBearerEndpoint
-      .tag("users")
+      .tag("Users")
       .name("update password")
       .description("Update account password")
       .in("users" / "password")
@@ -31,7 +31,7 @@ trait UserEndpoints extends BaseEndpoint {
 
   val deleteEndpoint: Endpoint[String, DeleteAccountRequest, Throwable, User, Any] =
     secureBearerEndpoint
-      .tag("users")
+      .tag("Users")
       .name("delete account")
       .description("Delete your account")
       .in("users")
@@ -41,7 +41,7 @@ trait UserEndpoints extends BaseEndpoint {
 
   val generateTokenEndpoint =
     baseEndpoint
-      .tag("users")
+      .tag("Users")
       .name("generate token")
       .description("Return a user JWT")
       .post

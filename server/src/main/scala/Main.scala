@@ -1,7 +1,14 @@
-import controllers.{BaseController, HealthController, UserController}
+import controllers.{
+  BaseController,
+  CompanyController,
+  HealthController,
+  UserController
+}
 import org.flywaydb.core.api.FlywayException
 import repositories.Repository
+import repositories.companies.CompanyRepositoryLive
 import repositories.users.UserRepositoryLive
+import services.companies.{CompanyService, CompanyServiceLive}
 import services.flyway.{FlywayService, FlywayServiceLive}
 import services.jwt.{JWTService, JWTServiceLive}
 import services.user.{UserService, UserServiceLive}
@@ -24,10 +31,13 @@ object Main extends ZIOAppDefault {
     * @return
     */
   def makeControllers
-      : ZIO[UserService with JWTService, Nothing, Seq[BaseController]] = for {
-    health <- HealthController.makeZIO
-    users  <- UserController.makeZIO
-  } yield Seq(health, users)
+      : ZIO[JWTService with CompanyService with UserService, Nothing, Seq[
+        BaseController
+      ]] = for {
+    health    <- HealthController.makeZIO
+    users     <- UserController.makeZIO
+    companies <- CompanyController.makeZIO
+  } yield Seq(health, users, companies)
 
   /** A method to aggregate the routes of our Controllers, and add swagger
     * documentation
@@ -57,7 +67,11 @@ object Main extends ZIOAppDefault {
   /** Our main server application
     */
   val program: ZIO[
-    Server with UserService with JWTService with FlywayService,
+    Server
+      with UserService
+      with CompanyService
+      with JWTService
+      with FlywayService,
     Throwable,
     ExitCode
   ] = for {
@@ -85,6 +99,8 @@ object Main extends ZIOAppDefault {
         FlywayServiceLive.configuredLayer,
         UserRepositoryLive.layer,
         UserServiceLive.layer,
+        CompanyRepositoryLive.layer,
+        CompanyServiceLive.layer,
         JWTServiceLive.configuredLayer,
         Runtime.removeDefaultLoggers >>> SLF4J.slf4j // Make sure our ZIO.log's use slf4j
       )
