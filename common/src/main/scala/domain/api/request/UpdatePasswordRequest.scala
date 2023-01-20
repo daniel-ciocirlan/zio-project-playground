@@ -9,5 +9,5 @@ case class UpdatePasswordRequest(
 )
 
 object UpdatePasswordRequest {
-  implicit lazy val codec: JsonCodec[UpdatePasswordRequest] = DeriveJsonCodec.gen[UpdatePasswordRequest]
+  implicit val codec: JsonCodec[UpdatePasswordRequest] = DeriveJsonCodec.gen[UpdatePasswordRequest]
 }

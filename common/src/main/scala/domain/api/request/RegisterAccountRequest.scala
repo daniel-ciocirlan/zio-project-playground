@@ -8,5 +8,5 @@ case class RegisterAccountRequest(
 )
 
 object RegisterAccountRequest {
-  implicit lazy val codec: JsonCodec[RegisterAccountRequest] = DeriveJsonCodec.gen[RegisterAccountRequest]
+  implicit val codec: JsonCodec[RegisterAccountRequest] = DeriveJsonCodec.gen[RegisterAccountRequest]
 }

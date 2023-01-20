@@ -9,5 +9,5 @@ case class TokenResponse(
 )
 
 object TokenResponse {
-  implicit lazy val codec: JsonCodec[TokenResponse] = DeriveJsonCodec.gen[TokenResponse]
+  implicit val codec: JsonCodec[TokenResponse] = DeriveJsonCodec.gen[TokenResponse]
 }

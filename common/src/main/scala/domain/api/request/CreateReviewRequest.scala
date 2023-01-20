@@ -13,5 +13,5 @@ case class CreateReviewRequest(
 )
 
 object CreateReviewRequest {
-  implicit lazy val codec: JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
+  implicit val codec: JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
 }

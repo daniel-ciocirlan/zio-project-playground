@@ -8,5 +8,5 @@ case class CreateCompanyRequest(
 )
 
 object CreateCompanyRequest{
-  implicit lazy val codec: JsonCodec[CreateCompanyRequest] = DeriveJsonCodec.gen[CreateCompanyRequest]
+  implicit val codec: JsonCodec[CreateCompanyRequest] = DeriveJsonCodec.gen[CreateCompanyRequest]
 }
