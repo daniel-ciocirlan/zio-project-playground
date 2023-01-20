@@ -2,15 +2,18 @@ import controllers.{
   BaseController,
   CompanyController,
   HealthController,
+  ReviewController,
   UserController
 }
 import org.flywaydb.core.api.FlywayException
 import repositories.Repository
 import repositories.companies.CompanyRepositoryLive
+import repositories.reviews.ReviewRepositoryLive
 import repositories.users.UserRepositoryLive
 import services.company.{CompanyService, CompanyServiceLive}
 import services.flyway.{FlywayService, FlywayServiceLive}
 import services.jwt.{JWTService, JWTServiceLive}
+import services.review.{ReviewService, ReviewServiceLive}
 import services.user.{UserService, UserServiceLive}
 import sttp.tapir.server.ServerEndpoint
 import sttp.tapir.server.interceptor.cors.CORSInterceptor
@@ -30,14 +33,18 @@ object Main extends ZIOAppDefault {
     *
     * @return
     */
-  def makeControllers
-      : ZIO[JWTService with CompanyService with UserService, Nothing, Seq[
-        BaseController
-      ]] = for {
+  def makeControllers: ZIO[
+    JWTService with CompanyService with UserService with ReviewService,
+    Nothing,
+    Seq[
+      BaseController
+    ]
+  ] = for {
     health    <- HealthController.makeZIO
     users     <- UserController.makeZIO
     companies <- CompanyController.makeZIO
-  } yield Seq(health, users, companies)
+    reviews   <- ReviewController.makeZIO
+  } yield Seq(health, users, companies, reviews)
 
   /** A method to aggregate the routes of our Controllers, and add swagger
     * documentation
@@ -70,6 +77,7 @@ object Main extends ZIOAppDefault {
     Server
       with UserService
       with CompanyService
+      with ReviewService
       with JWTService
       with FlywayService,
     Throwable,
@@ -102,6 +110,8 @@ object Main extends ZIOAppDefault {
         CompanyRepositoryLive.layer,
         CompanyServiceLive.layer,
         JWTServiceLive.configuredLayer,
+        ReviewRepositoryLive.layer,
+        ReviewServiceLive.layer,
         Runtime.removeDefaultLoggers >>> SLF4J.slf4j // Make sure our ZIO.log's use slf4j
       )
 }
