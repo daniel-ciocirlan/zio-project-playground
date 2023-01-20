@@ -48,7 +48,10 @@ lazy val server = (project in file("server"))
     libraryDependencies ++= Dependencies.server,
     Defaults.itSettings,
     fork := true,
-    scalafixConfigSettings(IntegrationTest)
+    scalafixConfigSettings(IntegrationTest),
+    inConfig(IntegrationTest)(
+      org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
+    )
   )
   .dependsOn(common.jvm)
 
