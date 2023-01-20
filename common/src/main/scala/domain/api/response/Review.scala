@@ -17,5 +17,5 @@ case class Review(
 )
 
 object Review {
-  implicit lazy val codec: JsonCodec[Review] = DeriveJsonCodec.gen[Review]
+  implicit val codec: JsonCodec[Review] = DeriveJsonCodec.gen[Review]
 }

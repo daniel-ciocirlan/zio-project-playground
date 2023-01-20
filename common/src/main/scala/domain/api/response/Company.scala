@@ -10,5 +10,5 @@ case class Company(
 )
 
 object Company {
-  implicit lazy val codec: JsonCodec[Company] = DeriveJsonCodec.gen[Company]
+  implicit val codec: JsonCodec[Company] = DeriveJsonCodec.gen[Company]
 }
