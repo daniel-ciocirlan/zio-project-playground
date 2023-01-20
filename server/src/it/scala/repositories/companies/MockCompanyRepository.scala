@@ -1,6 +1,6 @@
 package repositories.companies
 
-import zio.mock.{Mock, mockable}
+import zio.mock.mockable
 
 @mockable[CompanyRepository]
-object MockCompanyRepository extends Mock[CompanyRepository]
+object MockCompanyRepository
