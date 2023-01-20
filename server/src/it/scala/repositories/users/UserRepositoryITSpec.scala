@@ -54,14 +54,13 @@ object UserRepositoryITSpec extends ZIOSpecDefault {
         .serviceWithZIO[FlywayService](_.runMigrations)
     )
 
-
   override def spec: Spec[TestEnvironment with Scope, Any] =
     suite("UserRepositoryITSpec")(
       tests
     ).provideSome[DataSource & PostgreSQLContainer & Scope](
       Repository.quillPostgresLayer,
       UserRepositoryLive.layer,
-      FlywayServiceLive.testContainerLayer,
+      FlywayServiceLive.testContainerLayer
     ).provideSomeLayerShared[Scope](
       ZPostgreSQLContainer.Settings.default >>> ZPostgreSQLContainer.live
     )
