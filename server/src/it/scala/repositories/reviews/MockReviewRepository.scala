@@ -1,6 +1,6 @@
 package repositories.reviews
 
-import zio.mock.{Mock, mockable}
+import zio.mock.mockable
 
 @mockable[ReviewRepository]
-object MockReviewRepository extends Mock[ReviewRepository]
+object MockReviewRepository

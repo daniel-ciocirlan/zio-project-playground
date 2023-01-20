@@ -47,7 +47,8 @@ lazy val server = (project in file("server"))
     name := "zio-project-playground-server",
     libraryDependencies ++= Dependencies.server,
     Defaults.itSettings,
-    fork := true
+    fork := true,
+    scalafixConfigSettings(IntegrationTest)
   )
   .dependsOn(common.jvm)
 
@@ -66,7 +67,4 @@ lazy val app = (project in file("app"))
 
 addCommandAlias("fmt", "all root/scalafmtSbt root/scalafmtAll")
 addCommandAlias("fmtCheck", "all root/scalafmtSbtCheck root/scalafmtCheckAll")
-addCommandAlias(
-  "fix",
-  "root/scalafixAll RemoveUnused"
-)
+addCommandAlias("fix", "scalafixAll")
