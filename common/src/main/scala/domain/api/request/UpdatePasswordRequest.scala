@@ -1,6 +1,6 @@
 package domain.api.request
 
-import upickle.default._
+import zio.json.{DeriveJsonCodec, JsonCodec}
 
 case class UpdatePasswordRequest(
     userName: String,
@@ -9,6 +9,5 @@ case class UpdatePasswordRequest(
 )
 
 object UpdatePasswordRequest {
-  implicit val rw: ReadWriter[UpdatePasswordRequest] = macroRW
-
+  implicit lazy val codec: JsonCodec[UpdatePasswordRequest] = DeriveJsonCodec.gen[UpdatePasswordRequest]
 }
