@@ -4,7 +4,7 @@ import domain.api.request.{DeleteAccountRequest, LoginForm, RegisterAccountReque
 import domain.api.response.{TokenResponse, User}
 import sttp.tapir._
 import sttp.tapir.generic.auto.schemaForCaseClass
-import sttp.tapir.json.upickle.jsonBody
+import sttp.tapir.json.zio.jsonBody
 
 trait UserEndpoints extends BaseEndpoint {
 

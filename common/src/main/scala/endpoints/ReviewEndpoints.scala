@@ -2,7 +2,7 @@ package endpoints
 
 import domain.api.request.CreateReviewRequest
 import domain.api.response.Review
-import sttp.tapir.json.upickle.jsonBody
+import sttp.tapir.json.zio.jsonBody
 import sttp.tapir.generic.auto.schemaForCaseClass
 import sttp.tapir._
 

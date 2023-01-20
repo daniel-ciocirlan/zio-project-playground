@@ -28,15 +28,16 @@ lazy val common = crossProject(JVMPlatform, JSPlatform)
   .settings(
     name := "zio-project-playground-common",
     libraryDependencies ++= Seq(
-      "com.softwaremill.sttp.tapir"   %%% "tapir-sttp-client"  % Dependencies.tapirVersion,
-//      "com.softwaremill.sttp.tapir"   %%% "tapir-json-zio"     % Dependencies.tapirVersion, // brings in zio-json
-      "com.softwaremill.sttp.tapir"   %%% "tapir-json-upickle" % Dependencies.tapirVersion,
-      "com.softwaremill.sttp.client3" %%% "zio"                % Dependencies.sttpVersion
+      "com.softwaremill.sttp.tapir"   %%% "tapir-sttp-client" % Dependencies.tapirVersion,
+      "com.softwaremill.sttp.tapir"   %%% "tapir-json-zio"    % Dependencies.tapirVersion, // This should bring in zio-json...
+      "com.softwaremill.sttp.client3" %%% "zio"               % Dependencies.sttpVersion,
+      // ... but bring in zio-json explicitly, otherwise fastOptJs seems to throw linking errors
+      "dev.zio"                       %%% "zio-json"          % "0.4.2"
     )
   )
   .jsSettings(
     libraryDependencies ++= Seq(
-      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" // implementations of java.time classes for Scala.JS
+      "io.github.cquiroz" %%% "scala-java-time" % "2.5.0" // implementations of java.time classes for Scala.JS,
     )
   )
 

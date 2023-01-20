@@ -1,7 +1,7 @@
 package domain.api.response
 
 import java.time.Instant
-import upickle.default._
+import zio.json.{DeriveJsonCodec, JsonCodec}
 
 case class Review(
     id: Long,
@@ -17,12 +17,5 @@ case class Review(
 )
 
 object Review {
-
-  implicit val instantRW: ReadWriter[Instant] = readwriter[String].bimap[Instant](
-    f = i => i.toString,
-    g = s => Instant.parse(s)
-  )
-
-  implicit val rw: ReadWriter[Review] = macroRW
-
+  implicit lazy val codec: JsonCodec[Review] = DeriveJsonCodec.gen[Review]
 }

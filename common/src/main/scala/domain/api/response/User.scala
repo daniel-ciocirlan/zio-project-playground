@@ -1,9 +1,9 @@
 package domain.api.response
 
-import upickle.default._
+import zio.json.{DeriveJsonCodec, JsonCodec}
 
 case class User(userName: String)
 
 object User {
-  implicit val rw: ReadWriter[User] = macroRW
+  implicit lazy val codec: JsonCodec[User] = DeriveJsonCodec.gen[User]
 }

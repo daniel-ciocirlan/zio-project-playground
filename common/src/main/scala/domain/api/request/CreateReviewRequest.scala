@@ -1,6 +1,6 @@
 package domain.api.request
 
-import upickle.default._
+import zio.json.{DeriveJsonCodec, JsonCodec}
 
 case class CreateReviewRequest(
     companyId: Long,
@@ -13,5 +13,5 @@ case class CreateReviewRequest(
 )
 
 object CreateReviewRequest {
-  implicit val rw: ReadWriter[CreateReviewRequest] = macroRW
+  implicit lazy val codec: JsonCodec[CreateReviewRequest] = DeriveJsonCodec.gen[CreateReviewRequest]
 }

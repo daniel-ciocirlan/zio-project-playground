@@ -4,7 +4,7 @@ import domain.api.request.CreateCompanyRequest
 import domain.api.response.Company
 import sttp.tapir._
 import sttp.tapir.generic.auto.schemaForCaseClass
-import sttp.tapir.json.upickle.jsonBody
+import sttp.tapir.json.zio.jsonBody
 
 
 trait CompanyEndpoints extends BaseEndpoint {
