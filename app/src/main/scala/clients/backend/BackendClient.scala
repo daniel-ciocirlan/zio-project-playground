@@ -1,13 +1,24 @@
 package clients.backend
 
-import domain.api.request.{LoginForm, RegisterAccountRequest}
-import domain.api.response.{TokenResponse, User}
-import endpoints.{HealthEndpoints, UserEndpoints}
+import domain.api.request.{
+  CreateCompanyRequest,
+  CreateReviewRequest,
+  LoginForm,
+  RegisterAccountRequest
+}
+import domain.api.response.{Company, Review, TokenResponse, User}
+import endpoints.{
+  CompanyEndpoints,
+  HealthEndpoints,
+  ReviewEndpoints,
+  UserEndpoints
+}
 import state.AppState
 import sttp.capabilities.zio.ZioStreams
 import sttp.client3._
 import sttp.client3.impl.zio.FetchZioBackend
 import sttp.model.Uri
+import sttp.tapir.Endpoint
 import sttp.tapir.client.sttp.SttpClientInterpreter
 import zio._
 
@@ -19,6 +30,15 @@ trait BackEndClient {
   def fetchToken(request: LoginForm): Task[TokenResponse]
   def fetchTime(): Task[Instant]
   def fetchTimeSecure(): Task[Instant]
+  def testUri(uri: Uri): Task[Boolean]
+
+  def createCompany(request: CreateCompanyRequest): Task[Company]
+  def getCompanies: Task[Seq[Company]]
+  def getCompanyById(id: String): Task[Option[Company]]
+
+  def createReview(request: CreateReviewRequest): Task[Review]
+  def getReviewById(id: Long): Task[Option[Review]]
+  def getReviewsByCompanyId(id: Long): Task[Seq[Review]]
 
 }
 
@@ -31,10 +51,37 @@ case class BackendClientLive(
     config: BackEndClientConfig
 ) extends BackEndClient {
 
-  val health = new HealthEndpoints {}
-  val user   = new UserEndpoints {}
+  val health  = new HealthEndpoints {}
+  val user    = new UserEndpoints {}
+  val company = new CompanyEndpoints {}
+  val review  = new ReviewEndpoints {}
 
-  val interpreter: SttpClientInterpreter = SttpClientInterpreter()
+  private val interpreter: SttpClientInterpreter = SttpClientInterpreter()
+  private def endpointRequest[I, E, O](
+      endpoint: Endpoint[Unit, I, E, O, Any]
+  ): I => Request[Either[E, O], Any] =
+    interpreter.toRequestThrowDecodeFailures(endpoint, config.uri)
+
+  private def endpointRequestZIO[I, E <: Throwable, O](
+      endpoint: Endpoint[Unit, I, E, O, Any]
+  )(request: I): Task[O] =
+    backend.send(endpointRequest(endpoint)(request)).map(_.body).absolve
+
+  private def secureEndpointRequest[S, I, E, O](
+      endpoint: Endpoint[S, I, E, O, Any]
+  ): S => I => Request[Either[E, O], Any] =
+    interpreter.toSecureRequestThrowDecodeFailures(endpoint, config.uri)
+
+  private def secureEndpointRequestZIO[I, E <: Throwable, O](
+      endpoint: Endpoint[String, I, E, O, Any]
+  )(request: I): Task[O] =
+    for {
+      token    <- tokenOrFail
+      response <- backend
+                    .send(secureEndpointRequest(endpoint)(token)(request))
+                    .map(_.body)
+                    .absolve
+    } yield response
 
   private def tokenOrFail: Task[String] = {
     for {
@@ -57,63 +104,47 @@ case class BackendClientLive(
   }
 
   override def createAccount(request: RegisterAccountRequest): Task[User] = {
-
-    val _request
-        : RegisterAccountRequest => Request[Either[Throwable, User], Any] =
-      interpreter.toRequestThrowDecodeFailures(
-        user.registerEndpoint,
-        config.uri
-      )
-
-    backend
-      .send(_request(request))
-      .map(_.body)
-      .absolve
-
+    endpointRequestZIO(user.registerEndpoint)(request)
   }
 
   override def fetchToken(request: LoginForm): Task[TokenResponse] = {
-
-    val _request: LoginForm => Request[Either[Throwable, TokenResponse], Any] =
-      interpreter.toRequestThrowDecodeFailures(
-        user.generateTokenEndpoint,
-        config.uri
-      )
-
-    backend
-      .send(_request(request))
-      .map(_.body)
-      .absolve
-
+    endpointRequestZIO(user.generateTokenEndpoint)(request)
   }
 
   override def fetchTime(): Task[Instant] = {
-
-    val _request: Unit => Request[Either[Throwable, Instant], Any] =
-      interpreter.toRequestThrowDecodeFailures(health.timeEndpoint, config.uri)
-
-    backend
-      .send(_request(()))
-      .map(_.body)
-      .absolve
-
+    endpointRequestZIO(health.timeEndpoint)(())
   }
 
   override def fetchTimeSecure(): Task[Instant] = {
-
-    val _request: String => Unit => Request[Instant, Any] =
-      interpreter.toSecureRequestThrowErrors(
-        health.secureTimeEndpoint,
-        config.uri
-      )
-
-    for {
-      token    <- tokenOrFail
-      response <- backend.send(_request(token)(())).map(_.body)
-    } yield response
-
+    secureEndpointRequestZIO(health.secureTimeEndpoint)(())
   }
 
+  override def testUri(uri: Uri): Task[Boolean] = {
+    backend
+      .send(
+        basicRequest.get(uri)
+      )
+      .map(_.isSuccess)
+  }
+
+  override def createCompany(request: CreateCompanyRequest): Task[Company] = {
+    secureEndpointRequestZIO(company.createEndpoint)(request)
+  }
+
+  override def getCompanies: Task[Seq[Company]] =
+    endpointRequestZIO(company.getAllEndpoint)(())
+
+  override def getCompanyById(id: String): Task[Option[Company]] =
+    endpointRequestZIO(company.getByIdEndpoint)(id)
+
+  override def createReview(request: CreateReviewRequest): Task[Review] =
+    secureEndpointRequestZIO(review.createEndpoint)(request)
+
+  override def getReviewById(id: Long): Task[Option[Review]] =
+    endpointRequestZIO(review.getByIdEndpoint)(id)
+
+  override def getReviewsByCompanyId(id: Long): Task[Seq[Review]] =
+    endpointRequestZIO(review.getByCompanyIdEndpoint)(id)
 }
 
 object BackendClientLive {
