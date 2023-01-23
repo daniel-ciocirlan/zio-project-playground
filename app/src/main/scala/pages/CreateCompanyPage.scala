@@ -6,7 +6,6 @@ import helpers.ZJS
 import helpers.ZJS.ExtendedZIO
 import io.frontroute.BrowserNavigation
 import layouts.Page
-import sttp.client3.UriContext
 import zio._
 
 object CreateCompanyPage {
@@ -56,15 +55,6 @@ object CreateCompanyPage {
         stateVar.update(_.copy(showErrors = false))
         (
           for {
-            uri     <- ZIO.attempt(uri"${state.website}")
-            _       <-
-              ZJS
-                .client(_.testUri(uri))
-                .filterOrFail(_ == true)(
-                  new Exception(
-                    "The website you entered doesn't seem valid! Please check that it works."
-                  )
-                )
             company <-
               ZJS.client(
                 _.createCompany(CreateCompanyRequest(state.name, state.website))
@@ -73,11 +63,83 @@ object CreateCompanyPage {
             stateVar.set(FormState())
             BrowserNavigation.replaceState(s"/companies/${company.id}")
           }
-        ).runJs
+        ).tapError { case e =>
+          ZIO.succeed(
+            stateVar.update(
+              _.copy(showErrors = true, upstreamError = Option(e.getMessage))
+            )
+          )
+        }.runJs
       }
     }
 
+  val createCompanyForm =
+    div(
+      className := "container my-lg-5 my-md-3 my-sm-1",
+      h3(
+        className := "pt-5",
+        "Create a Company Listing"
+      ),
+      div(
+        className := "alert alert-danger my-3",
+        hidden <-- stateVar.signal.map(!_.showErrors),
+        child.text <-- stateVar.signal.map(
+          _.errorMessage.getOrElse("Something has gone wrong")
+        )
+      ),
+      form(
+        onSubmit.preventDefault
+          .mapTo(stateVar.now()) --> submitter,
+        div(
+          className := "form-group",
+          label(forId        := "company", "Company Name"),
+          input(
+            className        := "form-control",
+            `type`           := "text",
+            idAttr           := "company",
+            aria.describedBy := "companyHelp",
+            placeholder      := "Enter the Company Name",
+            controlled(
+              value <-- stateVar.signal.map(_.name),
+              onInput.mapToValue --> nameWriter
+            )
+          ),
+          small(
+            idAttr           := "companyHelp",
+            className        := "form-text form-muted",
+            "The company name that will show on the site"
+          )
+        ),
+        div(
+          className := "form-group",
+          label(forId        := "url", "Company Website"),
+          input(
+            className        := "form-control",
+            `type`           := "text",
+            idAttr           := "url",
+            aria.describedBy := "urlHelp",
+            placeholder      := "Enter the Company Website",
+            controlled(
+              value <-- stateVar.signal.map(_.website),
+              onInput.mapToValue --> urlWriter
+            )
+          ),
+          small(
+            idAttr           := "urlHelp",
+            className        := "form-text form-muted",
+            "The company's website"
+          )
+        ),
+        button(
+          `type`    := "submit",
+          className := "btn btn-primary",
+          "Submit"
+        )
+      )
+    )
+
   def apply(): HtmlElement = Page(
+    createCompanyForm
   )
 
 }
