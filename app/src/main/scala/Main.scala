@@ -5,6 +5,7 @@ import org.scalajs.dom
 import pages.{
   AboutPage,
   CompaniesPage,
+  CompanyPage,
   CreateCompanyPage,
   HomePage,
   LoginPage,
@@ -29,8 +30,11 @@ object Main {
           pathEnd {
             CompaniesPage()
           },
-          path("create") {
-            CreateCompanyPage()
+          path(segment) { path =>
+            path match {
+              case "create" => CreateCompanyPage()
+              case id       => CompanyPage(id)
+            }
           }
         )
       },
