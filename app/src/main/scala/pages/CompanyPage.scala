@@ -8,30 +8,46 @@ object CompanyPage {
 
   val content: Var[HtmlElement] = Var[HtmlElement](div())
 
-  def buildContent(id: String) =
-    ZJS
-      .client(_.getCompanyById(id))
-      .map {
-        _.map { c =>
-          div(
-            className := "card",
-            div(
-              className := "card-body",
-              h5(className := "card-title", c.name),
-              p(
-                className  := "card-text",
-                "review summary will go here..."
-              ),
-              a(
-                className  := "card-link",
-                href       := c.url,
-                "Website"
+  def buildContent(id: String) = {
+    for {
+      c       <- ZJS
+                   .client(_.getCompanyById(id))
+                   .someOrFail(new Exception("TODO Make this a 404"))
+      reviews <- ZJS.client(_.getReviewsByCompanyId(c.id))
+    } yield {
+      div(
+        className := "card",
+        div(
+          className := "card-body",
+          h5(className := "card-title", c.name),
+          p(
+            className  := "card-text",
+            "review summary will go here..."
+          ),
+          ul(
+            className  := "list-group list-group-flush",
+            // TODO if no reviews, suggest adding one
+            reviews.map { r =>
+              li(
+                className := "list-group-item",
+                r.review // TODO map this to a better component
               )
-            )
+            }
+          ),
+          a(
+            className  := "card-link",
+            href       := c.url,
+            "Website"
+          ),
+          a(
+            className  := "card-link",
+            href       := s"/reviews/add/${c.id}",
+            "Add Review"
           )
-        }.getOrElse(div())
-      }
-      .map(s => content.set(s))
+        )
+      )
+    }
+  }.map(s => content.set(s))
 
   def apply(companyId: String): HtmlElement = Page(
     div(
