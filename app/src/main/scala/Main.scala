@@ -4,6 +4,7 @@ import layouts.Page
 import org.scalajs.dom
 import pages.{
   AboutPage,
+  AddReviewPage,
   CompaniesPage,
   CompanyPage,
   CreateCompanyPage,
@@ -34,6 +35,15 @@ object Main {
             path match {
               case "create" => CreateCompanyPage()
               case id       => CompanyPage(id)
+            }
+          }
+        )
+      },
+      pathPrefix("reviews") {
+        div(
+          pathPrefix("add") {
+            path(segment) { companyId =>
+              AddReviewPage(companyId.toLong) // TODO handle safely
             }
           }
         )
