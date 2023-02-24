@@ -11,8 +11,7 @@ import pages.{
   HomePage,
   LoginPage,
   LogoutPage,
-  SignUpPage,
-  TimePage
+  SignUpPage
 }
 import state.AppState
 
@@ -50,9 +49,6 @@ object Main {
       },
       path("about") {
         AboutPage()
-      },
-      path("time") {
-        TimePage()
       },
       pathPrefix("account") {
         div(
