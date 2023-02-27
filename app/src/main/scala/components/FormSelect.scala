@@ -9,9 +9,10 @@ object FormSelect {
   def apply[O](
       title: String,
       options: Seq[O],
-      selectedIndex: Int = 0,
-      stateWriter: Observer[O]
-  )(implicit conversion: String => O): HtmlElement = {
+      selectedIndex: Int,
+      stateWriter: Observer[O],
+      modifiers: Modifier[Div]*
+  )(implicit conversion: String => O): Div = {
     val id = UUID.randomUUID().toString
     div(
       className := "form-group",
@@ -28,7 +29,8 @@ object FormSelect {
             o.toString
           )
         }
-      )
+      ),
+      modifiers
     )
   }
 

@@ -6,8 +6,9 @@ object TextInput {
 
   def apply(
       title: String,
-      stateWriter: Observer[String]
-  ): HtmlElement = {
+      stateWriter: Observer[String],
+      modifiers: Modifier[Div]*
+  ): Div = {
     val id = UUID.randomUUID().toString
     div(
       className := "form-group",
@@ -20,7 +21,8 @@ object TextInput {
         idAttr    := id,
         onChange.mapToValue --> stateWriter,
         rows      := 10
-      )
+      ),
+      modifiers
     )
   }
 
